@@ -114,3 +114,5 @@ venv.bak/
 #Ignore outputs
 .results_experiments
 .results_experiments/*
+
+run_compile_all_cython.txt
