@@ -173,10 +173,6 @@ def _loadURM_preinitialized_item_id(URM_path, header=False, separator=",",
     item_id_list = df_original['item'].values
     rating_list = df_original['rating'].values
 
-    print(user_id_list.shape)
-    print(len(set(item_id_list)))
-    print(rating_list.shape)
-
     URM_all_builder.add_data_lists(user_id_list, item_id_list, rating_list)
 
     return URM_all_builder.get_SparseMatrix(), \

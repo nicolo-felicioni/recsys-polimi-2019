@@ -4,3 +4,22 @@ CUTOFF: 10 - ROC_AUC: 0.0337937, PRECISION: 0.0047071, PRECISION_RECALL_MIN_DEN:
 Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'>, results: 
 CUTOFF: 10 - ROC_AUC: 0.0332805, PRECISION: 0.0046583, PRECISION_RECALL_MIN_DEN: 0.0465829, RECALL: 0.0465829, MAP: 0.0243752, MRR: 0.0243752, NDCG: 0.0295930, F1: 0.0084696, HIT_RATE: 0.0465829, ARHR: 0.0243752, RMSE: nan, NOVELTY: 0.0054470, AVERAGE_POPULARITY: 0.4329958, DIVERSITY_MEAN_INTER_LIST: 0.9444480, DIVERSITY_HERFINDAHL: 0.9944406, COVERAGE_ITEM: 0.0295215, COVERAGE_USER: 1.0000000, DIVERSITY_GINI: 0.3144429, SHANNON_ENTROPY: 7.8488263, 
 
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'>, results: 
+CUTOFF: 10 - ROC_AUC: 0.0339022, PRECISION: 0.0047871, PRECISION_RECALL_MIN_DEN: 0.0478707, RECALL: 0.0478707, MAP: 0.0245433, MRR: 0.0245433, NDCG: 0.0300273, F1: 0.0087038, HIT_RATE: 0.0478707, ARHR: 0.0245433, RMSE: nan, NOVELTY: 0.0054459, AVERAGE_POPULARITY: 0.4339872, DIVERSITY_MEAN_INTER_LIST: 0.9453698, DIVERSITY_HERFINDAHL: 0.9945328, COVERAGE_ITEM: 0.0289267, COVERAGE_USER: 1.0000000, DIVERSITY_GINI: 0.3250244, SHANNON_ENTROPY: 7.8654847, 
+
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: 'list' object has no attribute 'max'
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: 'range' object has no attribute 'max'
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'>, results: 
+CUTOFF: 10 - ROC_AUC: 0.0334039, PRECISION: 0.0047160, PRECISION_RECALL_MIN_DEN: 0.0471602, RECALL: 0.0471602, MAP: 0.0245943, MRR: 0.0245943, NDCG: 0.0298782, F1: 0.0085746, HIT_RATE: 0.0471602, ARHR: 0.0245943, RMSE: nan, NOVELTY: 0.0054460, AVERAGE_POPULARITY: 0.4339360, DIVERSITY_MEAN_INTER_LIST: 0.9447717, DIVERSITY_HERFINDAHL: 0.9944730, COVERAGE_ITEM: 0.0296296, COVERAGE_USER: 1.0000000, DIVERSITY_GINI: 0.3151557, SHANNON_ENTROPY: 7.8571648, 
+
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'>, results: 
+CUTOFF: 10 - ROC_AUC: 0.0334730, PRECISION: 0.0047782, PRECISION_RECALL_MIN_DEN: 0.0477819, RECALL: 0.0477819, MAP: 0.0243986, MRR: 0.0243986, NDCG: 0.0298744, F1: 0.0086876, HIT_RATE: 0.0477819, ARHR: 0.0243986, RMSE: nan, NOVELTY: 0.0054480, AVERAGE_POPULARITY: 0.4327194, DIVERSITY_MEAN_INTER_LIST: 0.9444421, DIVERSITY_HERFINDAHL: 0.9944400, COVERAGE_ITEM: 0.0295215, COVERAGE_USER: 1.0000000, DIVERSITY_GINI: 0.3161747, SHANNON_ENTROPY: 7.8571216, 
+
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: 'NoneType' object is not iterable
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: sequence item 0: expected str instance, int found
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: sequence item 0: expected str instance, int found
+Algorithm: <class 'MatrixFactorization.PureSVDRecommender.PureSVDRecommender'> - Exception: PureSVDRecommender: Cold users not allowed. Users in trained model are 22519, requested prediction for users up to 22519
+Algorithm: <class 'SLIM_BPR.Cython.SLIM_BPR_Cython.SLIM_BPR_Cython'> - Exception: No module named 'SLIM_BPR.Cython.SLIM_BPR_Cython_Epoch'
+Algorithm: <class 'SLIM_BPR.Cython.SLIM_BPR_Cython.SLIM_BPR_Cython'> - Exception: index (22519) out of range
+Algorithm: <class 'SLIM_BPR.Cython.SLIM_BPR_Cython.SLIM_BPR_Cython'> - Exception: index (22519) out of range
+Algorithm: <class 'SLIM_BPR.Cython.SLIM_BPR_Cython.SLIM_BPR_Cython'> - Exception: index (22519) out of range
