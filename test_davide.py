@@ -2,6 +2,7 @@ from Base.Evaluation import MyEvaluator
 from Base.Evaluation.Evaluator import EvaluatorHoldout
 from DataObject import DataObject
 from DataReader import DataReader
+from Hybrid.Hybrid000AlphaRecommender import Hybrid000AlphaRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
@@ -61,11 +62,11 @@ if __name__ == '__main__':
     print(data.ucm_region)
     print(data.ucm_region.shape)
     # cold_recommender = TopPop(data.train_urm)
-    # recommender = MatrixFactorization_BPR_Cython(data.urm_train)
-    # cold_recommender.fit()
+    recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_region, data.ids_cold_user, data.ids_warm_user)
+    recommender.fit()
 
-    # for user_id in data.cold_user_ids:
-    #     recommended_items = cold_recommender.recommend(user_id, cutoff=10)
+    # for user_id in data.ids_warm_user:
+    #     recommended_items = recommender.recommend(user_id, cutoff=10)
     #     well_formatted = " ".join([str(x) for x in recommended_items])
     #     print(f"{user_id}, {well_formatted}\n")
 
@@ -85,18 +86,14 @@ if __name__ == '__main__':
     #                 logFile.flush()
 
     # recommender.fit()
-    # MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_warm_user, recommender)
+    MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender)
 
-    # recommender.fit(epochs=1100)
-    # f = open("submission.csv", "w+")
-    # f.write("user_id,item_list\n")
-    # for user_id in data.target_users:
-    #     if len(data.train_urm[user_id].indices) > 1:
-    #         recommended_items = recommender.recommend(user_id, cutoff=10)
-    #     else:
-    #         recommended_items = cold_recommender.recommend(user_id, cutoff=10)
-    #     well_formatted = " ".join([str(x) for x in recommended_items])
-    #     f.write(f"{user_id}, {well_formatted}\n")
+    f = open("submission.csv", "w+")
+    f.write("user_id,item_list\n")
+    for user_id in data.ids_target_users:
+        recommended_items = recommender.recommend(user_id, cutoff=10)
+        well_formatted = " ".join([str(x) for x in recommended_items])
+        f.write(f"{user_id}, {well_formatted}\n")
 
     # dataset_object = RecSys2019Reader()
     #

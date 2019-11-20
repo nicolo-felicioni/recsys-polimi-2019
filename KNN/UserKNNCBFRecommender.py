@@ -65,5 +65,4 @@ class UserKNNCBFRecommender(BaseSimilarityMatrixRecommender):
         similarity = Compute_Similarity(self.UCM.T, shrink=shrink, topK=topK, normalize=normalize, similarity = similarity, **similarity_args)
 
         self.W_sparse = similarity.compute_similarity()
-        print(self.W_sparse.shape)
         self.W_sparse = check_matrix(self.W_sparse, format='csr')

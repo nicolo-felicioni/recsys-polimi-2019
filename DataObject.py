@@ -4,6 +4,7 @@ from Data_manager.Splitter import Splitter
 import numpy as np
 from scipy import sparse as sps
 
+
 class DataObject(object):
 
     def __init__(self, data_reader):
@@ -26,7 +27,7 @@ class DataObject(object):
         self.icm_class = data_reader.load_icm_class()
         self.ucm_region = data_reader.load_ucm_region()
         splitter = Splitter(self.urm)
-        splitter.split_train_test(k=1, probability=0, random_seed=17)
+        splitter.split_train_test(k=0, probability=0, random_seed=17)
         self.urm_train = splitter.train_csr
         self.urm_test = splitter.test_csr
         self.ids_warm_train_users = splitter.ids_warm_train_users
@@ -37,74 +38,30 @@ class DataObject(object):
         self.number_of_warm_train_items = splitter.number_of_warm_train_items
         self.number_of_cold_train_users = splitter.number_of_cold_train_users
         self.number_of_cold_train_items = splitter.number_of_cold_train_items
-        #self.ucm_age
-        #self.icm_price
-        #self.icm_asset
-        #self.icm_class
+        self.number_of_interactions_per_user = (self.urm > 0).sum(axis=0)
+        self.number_of_interactions_per_item = (self.urm > 0).sum(axis=1)
 
     def clone(self):
         return copy.deepcopy(self)
 
     def print(self):
         print(f"urm size: {self.urm.shape}\n"
-              f"urm interactions: {self.urm.nnz} [{round(self.urm.nnz/self.urm.nnz * 100, 2)}%]\n"
-              f"number of users: {self.number_of_users} [{round(self.number_of_users/self.number_of_users * 100, 2)}%]\n"
-              f"number of items: {self.number_of_items} [{round(self.number_of_items/self.number_of_items * 100, 2)}%]\n"
-              f"number of warm users in urm: {self.number_of_warm_users} [{round(self.number_of_warm_users/self.number_of_users * 100, 2)}%]\n"
-              f"number of warm items in urm: {self.number_of_warm_items} [{round(self.number_of_warm_items/self.number_of_items * 100, 2)}%]\n"
-              f"number of cold users in urm: {self.number_of_cold_users} [{round(self.number_of_cold_users/self.number_of_users * 100, 2)}%]\n"
-              f"number of cold items in urm: {self.number_of_cold_items} [{round(self.number_of_cold_items/self.number_of_items * 100, 2)}%]\n"
+              f"urm interactions: {self.urm.nnz} [{round(self.urm.nnz / self.urm.nnz * 100, 2)}%]\n"
+              f"number of users: {self.number_of_users} [{round(self.number_of_users / self.number_of_users * 100, 2)}%]\n"
+              f"number of items: {self.number_of_items} [{round(self.number_of_items / self.number_of_items * 100, 2)}%]\n"
+              f"number of interactions per user max: {self.number_of_interactions_per_user.max()}\n"
+              f"number of interactions per item max: {self.number_of_interactions_per_item.max()}\n"
+              f"number of interactions per user avg: {round(self.number_of_interactions_per_user.mean(), 2)}\n"
+              f"number of interactions per item avg: {round(self.number_of_interactions_per_item.mean(), 2)}\n"
+              f"number of warm users in urm: {self.number_of_warm_users} [{round(self.number_of_warm_users / self.number_of_users * 100, 2)}%]\n"
+              f"number of warm items in urm: {self.number_of_warm_items} [{round(self.number_of_warm_items / self.number_of_items * 100, 2)}%]\n"
+              f"number of cold users in urm: {self.number_of_cold_users} [{round(self.number_of_cold_users / self.number_of_users * 100, 2)}%]\n"
+              f"number of cold items in urm: {self.number_of_cold_items} [{round(self.number_of_cold_items / self.number_of_items * 100, 2)}%]\n"
               f"train urm size: {self.urm_train.shape}\n"
-              f"train urm interactions: {self.urm_train.nnz} [{round(self.urm_train.nnz/self.urm.nnz * 100, 2)}%]\n"
-              f"number of warm users in train urm: {self.number_of_warm_train_users} [{round(self.number_of_warm_train_users/self.number_of_users * 100, 2)}%]\n"
-              f"number of warm items in train urm: {self.number_of_warm_train_items} [{round(self.number_of_warm_train_items/self.number_of_items * 100, 2)}%]\n"
-              f"number of cold users in train urm: {self.number_of_cold_train_users} [{round(self.number_of_cold_train_users/self.number_of_users * 100, 2)}%]\n"
-              f"number of cold items in train urm: {self.number_of_cold_train_items} [{round(self.number_of_cold_train_items/self.number_of_items * 100, 2)}%]\n"
+              f"train urm interactions: {self.urm_train.nnz} [{round(self.urm_train.nnz / self.urm.nnz * 100, 2)}%]\n"
+              f"number of warm users in train urm: {self.number_of_warm_train_users} [{round(self.number_of_warm_train_users / self.number_of_users * 100, 2)}%]\n"
+              f"number of warm items in train urm: {self.number_of_warm_train_items} [{round(self.number_of_warm_train_items / self.number_of_items * 100, 2)}%]\n"
+              f"number of cold users in train urm: {self.number_of_cold_train_users} [{round(self.number_of_cold_train_users / self.number_of_users * 100, 2)}%]\n"
+              f"number of cold items in train urm: {self.number_of_cold_train_items} [{round(self.number_of_cold_train_items / self.number_of_items * 100, 2)}%]\n"
               f"test urm size: {self.urm_train.shape}\n"
-              f"test urm interactions: {self.urm_test.nnz} [{round(self.urm_test.nnz/self.urm.nnz * 100, 2)}%]\n")
-
-    def print_statistics(self):
-        n_users = self.n_users
-        n_items = self.n_items
-        n_interactions = len(self.urm.data)
-        URM_all = self.urm
-
-        user_profile_length = np.ediff1d(URM_all.indptr)
-
-        max_interactions_per_user = user_profile_length.max()
-        avg_interactions_per_user = n_interactions / n_users
-        min_interactions_per_user = user_profile_length.min()
-
-        URM_all = sps.csc_matrix(URM_all)
-        item_profile_length = np.ediff1d(URM_all.indptr)
-
-        max_interactions_per_item = item_profile_length.max()
-        avg_interactions_per_item = n_interactions / n_items
-        min_interactions_per_item = item_profile_length.min()
-
-        print("DataReader: current dataset is: {}\n"
-              "\tNumber of items: {}\n"
-              "\tNumber of users: {}\n"
-              "\tNumber of interactions in URM_all: {}\n"
-              "\tInteraction density: {:.2E}\n"
-              "\tInteractions per user:\n"
-              "\t\t Min: {:.2E}\n"
-              "\t\t Avg: {:.2E}\n"
-              "\t\t Max: {:.2E}\n"
-              "\tInteractions per item:\n"
-              "\t\t Min: {:.2E}\n"
-              "\t\t Avg: {:.2E}\n"
-              "\t\t Max: {:.2E}\n".format(
-            self.__class__,
-            n_items,
-            n_users,
-            n_interactions,
-            n_interactions / (n_items * n_users),
-            min_interactions_per_user,
-            avg_interactions_per_user,
-            max_interactions_per_user,
-            min_interactions_per_item,
-            avg_interactions_per_item,
-            max_interactions_per_item,
-            #gini_index(user_profile_length),
-        ))
+              f"test urm interactions: {self.urm_test.nnz} [{round(self.urm_test.nnz / self.urm.nnz * 100, 2)}%]\n")
