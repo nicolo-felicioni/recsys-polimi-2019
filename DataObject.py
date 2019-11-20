@@ -16,7 +16,7 @@ class DataObject(object):
         self.ids_cold_user = [user for user in range(0, self.number_of_users) if user not in self.ids_warm_user]
         self.ids_cold_item = [item for item in range(0, self.number_of_items) if item not in self.ids_warm_item]
         self.number_of_warm_users = self.ids_warm_user.shape[0]
-        self.number_of_warm_users = self.ids_warm_item.shape[0]
+        self.number_of_warm_items = self.ids_warm_item.shape[0]
         self.number_of_cold_users = len(self.ids_cold_user)
         self.number_of_cold_items = len(self.ids_cold_item)
         self.ids_target_users = data_reader.load_target()
@@ -24,6 +24,7 @@ class DataObject(object):
         self.icm_asset = data_reader.load_icm_asset()
         self.icm_price = data_reader.load_icm_price()
         self.icm_class = data_reader.load_icm_class()
+        self.ucm_region = data_reader.load_ucm_region()
         splitter = Splitter(self.urm)
         splitter.split_train_test(k=1, probability=0, random_seed=17)
         self.urm_train = splitter.train_csr
@@ -36,16 +37,31 @@ class DataObject(object):
         self.number_of_warm_train_items = splitter.number_of_warm_train_items
         self.number_of_cold_train_users = splitter.number_of_cold_train_users
         self.number_of_cold_train_items = splitter.number_of_cold_train_items
+        #self.ucm_age
+        #self.icm_price
+        #self.icm_asset
+        #self.icm_class
 
     def clone(self):
         return copy.deepcopy(self)
 
     def print(self):
-        print(f"urm: {self.urm}"
-              f"urm size: {self.urm.shape}"
-              f"number of users: {self.number_of_users}"
-              f"number of items: {self.number_of_items}"
-              f"")
+        print(f"urm size: {self.urm.shape}\n"
+              f"urm interactions: {self.urm.nnz} [{round(self.urm.nnz/self.urm.nnz * 100, 2)}%]\n"
+              f"number of users: {self.number_of_users} [{round(self.number_of_users/self.number_of_users * 100, 2)}%]\n"
+              f"number of items: {self.number_of_items} [{round(self.number_of_items/self.number_of_items * 100, 2)}%]\n"
+              f"number of warm users in urm: {self.number_of_warm_users} [{round(self.number_of_warm_users/self.number_of_users * 100, 2)}%]\n"
+              f"number of warm items in urm: {self.number_of_warm_items} [{round(self.number_of_warm_items/self.number_of_items * 100, 2)}%]\n"
+              f"number of cold users in urm: {self.number_of_cold_users} [{round(self.number_of_cold_users/self.number_of_users * 100, 2)}%]\n"
+              f"number of cold items in urm: {self.number_of_cold_items} [{round(self.number_of_cold_items/self.number_of_items * 100, 2)}%]\n"
+              f"train urm size: {self.urm_train.shape}\n"
+              f"train urm interactions: {self.urm_train.nnz} [{round(self.urm_train.nnz/self.urm.nnz * 100, 2)}%]\n"
+              f"number of warm users in train urm: {self.number_of_warm_train_users} [{round(self.number_of_warm_train_users/self.number_of_users * 100, 2)}%]\n"
+              f"number of warm items in train urm: {self.number_of_warm_train_items} [{round(self.number_of_warm_train_items/self.number_of_items * 100, 2)}%]\n"
+              f"number of cold users in train urm: {self.number_of_cold_train_users} [{round(self.number_of_cold_train_users/self.number_of_users * 100, 2)}%]\n"
+              f"number of cold items in train urm: {self.number_of_cold_train_items} [{round(self.number_of_cold_train_items/self.number_of_items * 100, 2)}%]\n"
+              f"test urm size: {self.urm_train.shape}\n"
+              f"test urm interactions: {self.urm_test.nnz} [{round(self.urm_test.nnz/self.urm.nnz * 100, 2)}%]\n")
 
     def print_statistics(self):
         n_users = self.n_users

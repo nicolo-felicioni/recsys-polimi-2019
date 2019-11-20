@@ -6,6 +6,7 @@ urm_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-chall
 icm_asset_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_ICM_asset.csv"
 icm_price_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_ICM_price.csv"
 icm_class_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_ICM_sub_class.csv"
+ucm_region_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_region.csv"
 target_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/alg_sample_submission.csv"
 
 
@@ -109,4 +110,22 @@ class DataReader(object):
 
         return csr_matrix
 
+    def load_ucm_region(self):
+        df_original = pd.read_csv(filepath_or_buffer=ucm_region_path, sep=',', header=1,
+                                  dtype={'item': int, 'feature': int, 'data': float})
+
+        df_original.columns = ['item', 'feature', 'data']
+
+        item_id_list = df_original['item'].values
+        feature_id_list = df_original['feature'].values
+        data_id_list = df_original['data'].values
+
+        csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
+
+        print("DataReader:")
+        print("\tLoading the region UCM: " + icm_asset_path)
+        print("\t\tClass UCM size:" + str(csr_matrix.shape))
+        print("\tClass UCM loaded.")
+
+        return csr_matrix
 
