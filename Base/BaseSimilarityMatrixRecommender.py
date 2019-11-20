@@ -47,10 +47,14 @@ class BaseSimilarityMatrixRecommender(BaseRecommender):
         user_profile_array = self.URM_train[user_id_array]
 
         if items_to_compute is not None:
+            #print(items_to_compute)
             item_scores = - np.ones((len(user_id_array), self.URM_train.shape[1]), dtype=np.float32)*np.inf
             item_scores_all = user_profile_array.dot(self.W_sparse).toarray()
             item_scores[:, items_to_compute] = item_scores_all[:, items_to_compute]
         else:
+            print("user_profile_array: " + str(user_profile_array.shape))
+            print("user_profile_array: " + str(type(user_profile_array)))
+            print("W_sparse shape: " + str(self.W_sparse.shape))
             item_scores = user_profile_array.dot(self.W_sparse).toarray()
 
 

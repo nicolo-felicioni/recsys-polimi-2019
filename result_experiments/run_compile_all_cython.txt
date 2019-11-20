@@ -1,0 +1,5 @@
+Compiling [1/3]: MatrixFactorization_Cython_Epoch.pyx... PASS
+Compiling [2/3]: Compute_Similarity_Cython.pyx... PASS
+Compiling [3/3]: SLIM_BPR_Cython_Epoch.pyx... PASS
+run_compile_all_cython: Compilation finished. SUCCESS.
+Compilation log can be found here: './result_experiments/run_compile_all_cython.txt'
