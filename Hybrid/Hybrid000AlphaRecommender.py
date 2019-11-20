@@ -4,9 +4,9 @@ from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 
 class Hybrid000AlphaRecommender(BaseRecommender):
-    """Random recommender"""
+    """Hybrid000AlphaRecommender recommender"""
 
-    RECOMMENDER_NAME = "RandomRecommender"
+    RECOMMENDER_NAME = "Hybrid000AlphaRecommender"
 
     def __init__(self, URM_train, UCM, cold_users, warm_users):
         super(Hybrid000AlphaRecommender, self).__init__(URM_train)
