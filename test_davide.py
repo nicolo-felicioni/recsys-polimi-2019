@@ -58,7 +58,7 @@ if __name__ == '__main__':
     data_reader = DataReader()
     data = DataObject(data_reader)
     # cold_recommender = TopPop(data.train_urm)
-    recommender = MatrixFactorization_BPR_Cython(data.train_urm)
+    recommender = MatrixFactorization_BPR_Cython(data.urm_train)
     # cold_recommender.fit()
 
     # for user_id in data.cold_user_ids:
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     #                 logFile.flush()
 
     recommender.fit()
-    MyEvaluator.evaluate_algorithm(data.test_urm, data.warm_user_ids, recommender)
+    MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_warm_user, recommender)
 
     # recommender.fit(epochs=1100)
     # f = open("submission.csv", "w+")

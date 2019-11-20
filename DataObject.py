@@ -26,16 +26,16 @@ class DataObject(object):
         self.icm_class = data_reader.load_icm_class()
         splitter = Splitter(self.urm)
         splitter.split_train_test(k=1, probability=0, random_seed=17)
-        self.train_csr = self.train_csr
-        self.test_csr = self.test_csr
-        self.ids_warm_train_users = self.ids_warm_train_users
-        self.ids_warm_train_items = self.ids_warm_train_items
-        self.ids_cold_train_users = self.ids_cold_train_users
-        self.ids_cold_train_items = self.ids_cold_train_items
-        self.number_of_warm_train_users =  self.number_of_warm_train_users
-        self.number_of_warm_train_items = self.number_of_warm_train_items
-        self.number_of_cold_train_users = self.number_of_cold_train_users
-        self.number_of_cold_train_items = self.number_of_cold_train_items
+        self.urm_train = splitter.train_csr
+        self.urm_test = splitter.test_csr
+        self.ids_warm_train_users = splitter.ids_warm_train_users
+        self.ids_warm_train_items = splitter.ids_warm_train_items
+        self.ids_cold_train_users = splitter.ids_cold_train_users
+        self.ids_cold_train_items = splitter.ids_cold_train_items
+        self.number_of_warm_train_users = splitter.number_of_warm_train_users
+        self.number_of_warm_train_items = splitter.number_of_warm_train_items
+        self.number_of_cold_train_users = splitter.number_of_cold_train_users
+        self.number_of_cold_train_items = splitter.number_of_cold_train_items
 
     def clone(self):
         return copy.deepcopy(self)
