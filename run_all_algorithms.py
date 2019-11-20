@@ -4,7 +4,7 @@ from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 from MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
 from MatrixFactorization.PureSVDRecommender import PureSVDRecommender
-from MatrixFactorization.WRMFRecommender import WRMFRecommender
+#from MatrixFactorization.WRMFRecommender import WRMFRecommender
 
 from Base.NonPersonalizedRecommender import TopPop, Random, GlobalEffects
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         MatrixFactorization_FunkSVD_Cython,
         MatrixFactorization_AsySVD_Cython,
         PureSVDRecommender,
-        WRMFRecommender,
+        #WRMFRecommender,
     ]
 
 

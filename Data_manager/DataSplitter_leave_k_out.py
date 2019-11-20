@@ -9,6 +9,7 @@ Created on 12/01/18
 import scipy.sparse as sps
 import numpy as np
 from Base.DataIO import DataIO
+from Data_manager import Splitter
 
 from Data_manager.DataSplitter import DataSplitter
 from Data_manager.DataReader_utils import compute_density, reconcile_mapper_with_removed_tokens
@@ -63,7 +64,7 @@ class DataSplitter_leave_k_out(DataSplitter):
 
         self.k_out_value = k_out_value
         self.use_validation_set = use_validation_set
-        self.allow_cold_users = False
+        self.allow_cold_users = True
         self.leave_random_out = leave_random_out
 
         self._print("Cold users not allowed")
@@ -214,15 +215,18 @@ class DataSplitter_leave_k_out(DataSplitter):
 
 
 
-        splitted_data = split_train_leave_k_out_user_wise(URM, k_out = self.k_out_value,
-                                                          use_validation_set = self.use_validation_set,
-                                                          leave_random_out = self.leave_random_out)
+        # splitted_data = split_train_leave_k_out_user_wise(URM, k_out = self.k_out_value,
+        #                                                   use_validation_set = self.use_validation_set,
+        #                                                   leave_random_out = self.leave_random_out)
 
         if self.use_validation_set:
-            URM_train, URM_validation, URM_test = splitted_data
+            URM_train, URM_test = Splitter.split_train_test(URM)
+            URM_train, URM_validation = Splitter.split_train_test(URM_train)
+            #URM_train, URM_validation, URM_test = splitted_data
 
         else:
-            URM_train, URM_test = splitted_data
+            URM_train, URM_test = Splitter.split_train_test(URM)
+            #URM_train, URM_test = splitted_data
 
 
 

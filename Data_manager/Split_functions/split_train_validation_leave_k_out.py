@@ -74,12 +74,13 @@ def split_train_leave_k_out_user_wise(URM, k_out = 1, use_validation_set = True,
         user_interaction_data_test = user_interaction_data[0:k_out]
 
         URM_test_builder.add_data_lists([user_id]*len(user_interaction_items_test), user_interaction_items_test, user_interaction_data_test)
-
+        print(f"{user_interaction_items_test.shape}  {user_interaction_items_test.shape}")
 
         #validation interactions
         if use_validation_set:
             user_interaction_items_validation = user_interaction_items[k_out:k_out*2]
             user_interaction_data_validation = user_interaction_data[k_out:k_out*2]
+            print(f"{user_interaction_items_validation.shape}  {user_interaction_data_validation.shape}")
 
             URM_validation_builder.add_data_lists([user_id]*k_out, user_interaction_items_validation, user_interaction_data_validation)
 

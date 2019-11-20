@@ -110,3 +110,6 @@ venv.bak/
 #Ignore outputs
 .results_experiments
 .results_experiments/*
+
+#Ignore inputs
+.Data_manager_split_datasets/*
