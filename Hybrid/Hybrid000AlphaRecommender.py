@@ -16,8 +16,8 @@ class Hybrid000AlphaRecommender(BaseRecommender):
         self.warm_users = warm_users
 
 
-    def fit(self, random_seed=42, epochs=1200, topK = 10000, shrink=1):
-        self.warm_recommender.fit(epochs=1100)
+    def fit(self, random_seed=42, epochs=1200, topK = 14000, shrink=2, lambda_i = 0.0, lambda_j = 0.0):
+        self.warm_recommender.fit(epochs=epochs, lambda_i=lambda_i, lambda_j=lambda_j)
         self.cold_recommender.fit(topK=topK, shrink=shrink)
 
 

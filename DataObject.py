@@ -25,7 +25,9 @@ class DataObject(object):
         self.icm_asset = data_reader.load_icm_asset()
         self.icm_price = data_reader.load_icm_price()
         self.icm_class = data_reader.load_icm_class()
-        self.ucm_region = data_reader.load_ucm_region()
+        self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
+        self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
+        self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age])
         splitter = Splitter(self.urm)
         splitter.split_train_test(k=0, probability=0, random_seed=17)
         self.urm_train = splitter.train_csr
