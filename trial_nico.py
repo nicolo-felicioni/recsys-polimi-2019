@@ -3,6 +3,7 @@ from DataObject import DataObject
 from DataReader import DataReader
 from KNN.UserKNNAgeRecommender import UserKNNAgeRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
+import pandas as pd
 
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
@@ -27,10 +28,15 @@ import traceback, os
 
 if __name__ == '__main__':
 
+    df_user_age = pd.read_csv("Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv")
     data_reader = DataReader()
     data = DataObject(data_reader)
-    rec = UserKNNAgeRecommender(data.df_user_age, data.urm_train)
+    # print(data.urm_train.shape)
+
+    # rec = UserKNNAgeRecommender(df_user_age, data.urm_train)
     # rec = TopPop(data.urm_train)
+
+
 
     rec.fit(shrink=0, topK=50)
     MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, rec)

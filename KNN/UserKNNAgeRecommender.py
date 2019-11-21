@@ -38,16 +38,25 @@ class UserKNNAgeRecommender(BaseSimilarityMatrixRecommender):
         return item_scores
 
     def _compute_age_similarity(self, topK=50, shrink=100, distance_squared=True):
+
+
         user_list = self.df_age['row'].tolist()
         user_ids = list(dict.fromkeys(user_list)) # no duplicates
         number_of_users = len(user_ids)
         max_id = max(user_ids)
         knn = min(topK, number_of_users)
         s = np.zeros((max_id +1, max_id+1))
-        W_sparse = sps.csr_matrix((max_id +1, max_id+1))
-        W_sparse.setdiag(1)
+        # W_dense = np.zeros((max_id +1, max_id+1))
+        data = []
+        row_indices = []
+        col_indices = []
+
+
 
         for i in range(0,number_of_users):
+            import time
+            start = time.time()
+
             u_id = user_ids[i]
             u_age = self._get_age(u_id)
             s[u_id] = np.zeros(max_id+1)
@@ -55,21 +64,33 @@ class UserKNNAgeRecommender(BaseSimilarityMatrixRecommender):
                 v_id = user_ids[j]
                 v_age = self._get_age(v_id)
                 s[u_id][v_id] = self._simil(u_age, v_age)
+
             # for symmetry
             if u_id!=0:
                 for k in range(0, u_id):
                     s[u_id][k] = s[u_id-1][k]
 
             indices_topK = np.argpartition(s[u_id], -knn)[-knn:]
-            print("indices_topK")
-            print(indices_topK)
-            print(type(W_sparse))
-            print(W_sparse.shape)
-            print(u_id)
+            for _ in range(0,knn):
+                row_indices.append([u_id])
+
+
+            #print("indices_topK")
+            #print(indices_topK)
+            #print(u_id)
             for idx in indices_topK:
+                data.append(s[u_id][idx])
 
-                W_sparse[u_id][idx] = s[u_id][idx]
+            col_indices.append(list(indices_topK))
 
+            if(len(row_indices) == len(data) == len(col_indices) == knn):
+                print("correct dimensions")
+            else:
+                print("wrong dimensions")
+            stop = time.time()
+            print("time passed: " + str(stop-start))
+
+        W_sparse = sps.csr_matrix(data, (row_indices, col_indices))
         return W_sparse
 
 
