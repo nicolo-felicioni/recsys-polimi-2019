@@ -16,9 +16,9 @@ class Hybrid000AlphaRecommender(BaseRecommender):
         self.warm_users = warm_users
 
 
-    def fit(self, random_seed=42, epochs=1200, topK = 14000, shrink=2, lambda_i = 0.0, lambda_j = 0.0):
+    def fit(self, random_seed=42, epochs=500, topK = 14000, shrink=2, lambda_i = 0.0, lambda_j = 0.0):
         self.warm_recommender.fit(epochs=epochs, lambda_i=lambda_i, lambda_j=lambda_j)
-        self.cold_recommender.fit(topK=topK, shrink=shrink)
+        self.cold_recommender.fit(topK=topK, shrink=shrink, feature_weighting="BM25")
 
 
     def recommend(self, user_id_array, cutoff = None, remove_seen_flag=True, items_to_compute = None,
