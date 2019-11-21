@@ -1,6 +1,7 @@
 from Base.Evaluation import MyEvaluator
 from DataObject import DataObject
 from DataReader import DataReader
+from KNN.UserKNNAgeRecommender import UserKNNAgeRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
@@ -28,8 +29,8 @@ if __name__ == '__main__':
 
     data_reader = DataReader()
     data = DataObject(data_reader)
-    rec = UserKNNCBFRecommender(data.ucm_region, data.urm_train)
+    rec = UserKNNAgeRecommender(data.df_user_age, data.urm_train)
     # rec = TopPop(data.urm_train)
 
-    rec.fit(shrink=0, topK=10000)
+    rec.fit(shrink=0, topK=50)
     MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, rec)

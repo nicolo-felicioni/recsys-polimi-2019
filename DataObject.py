@@ -1,4 +1,5 @@
 import copy
+import pandas as pd
 
 from Data_manager.Splitter import Splitter
 import numpy as np
@@ -26,8 +27,10 @@ class DataObject(object):
         self.icm_price = data_reader.load_icm_price()
         self.icm_class = data_reader.load_icm_class()
         self.ucm_region = data_reader.load_ucm_region()
+        #TODO TEMPORARY SOLUTION FOR UCM AGE
+        self.df_user_age = pd.read_csv("Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv")
         splitter = Splitter(self.urm)
-        splitter.split_train_test(k=0, probability=0, random_seed=17)
+        splitter.split_train_test(k=1, probability=0, random_seed=16)
         self.urm_train = splitter.train_csr
         self.urm_test = splitter.test_csr
         self.ids_warm_train_users = splitter.ids_warm_train_users
