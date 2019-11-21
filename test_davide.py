@@ -65,8 +65,8 @@ if __name__ == '__main__':
 
 
     # cold_recommender = TopPop(data.train_urm)
-    # recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_all, data.ids_cold_user, data.ids_warm_user)
-    # recommender.fit(epochs=800, shrink=1, topK=15000)
+    recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_all, data.ids_cold_user, data.ids_warm_user)
+    recommender.fit(epochs=1050, shrink=1, topK=15000, lambda_j=0.0001, lambda_i=0.0001, random_seed=42)
 
     # for user_id in data.ids_warm_user:
     #     recommended_items = recommender.recommend(user_id, cutoff=10)
@@ -126,53 +126,53 @@ if __name__ == '__main__':
     #                     f.write(f"warm, {e}, {l_i}, {l_j}, {n_e}, {l_v_a}, {map}\n")
     #                     f.flush()
 
-    f = open("eval_user_cbf.csv", "w+")
-    f.write("type_user, shrink, topk, feature_weight, ucm_type, map\n")
-    evaluator = EvaluatorHoldout(data.urm_test, [10], exclude_seen=True)
-    for shrink in [1, 2, 3, 4, 5, 10, 15, 20, 50, 100]:
-        for k in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 11000, 12000, 13000, 14000, 15000]:
-            for simil in ["BM25", "none", "TF-IDF"]:
-                for type_ucm in [data.ucm_all, data.ucm_age, data.ucm_region]:
-                    recommender = UserKNNCBFRecommender(type_ucm, data.urm_train)
-                    recommender.fit(shrink=shrink, topK=k, feature_weighting=simil)
-                    result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender)
-                    print(result_string)
-                    if type_ucm is data.ucm_all:
-                        f.write(f"target, {shrink}, {k}, {simil}, all, {map}\n")
-                    else:
-                        if type_ucm is data.ucm_age:
-                            f.write(f"target, {shrink}, {k}, {simil}, age, {map}\n")
-                        else:
-                            f.write(f"target, {shrink}, {k}, {simil}, region, {map}\n")
+    # f = open("eval_user_cbf.csv", "w+")
+    # f.write("type_user, shrink, topk, feature_weight, ucm_type, map\n")
+    # evaluator = EvaluatorHoldout(data.urm_test, [10], exclude_seen=True)
+    # for shrink in [1, 2, 3, 4, 5, 10, 15, 20, 50, 100]:
+    #     for k in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 11000, 12000, 13000, 14000, 15000]:
+    #         for simil in ["BM25", "none", "TF-IDF"]:
+    #             for type_ucm in [data.ucm_all, data.ucm_age, data.ucm_region]:
+    #                 recommender = UserKNNCBFRecommender(type_ucm, data.urm_train)
+    #                 recommender.fit(shrink=shrink, topK=k, feature_weighting=simil)
+    #                 result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender)
+    #                 print(result_string)
+    #                 if type_ucm is data.ucm_all:
+    #                     f.write(f"target, {shrink}, {k}, {simil}, all, {map}\n")
+    #                 else:
+    #                     if type_ucm is data.ucm_age:
+    #                         f.write(f"target, {shrink}, {k}, {simil}, age, {map}\n")
+    #                     else:
+    #                         f.write(f"target, {shrink}, {k}, {simil}, region, {map}\n")
+    #
+    #                 f.flush()
+    #                 result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_warm_train_users, recommender)
+    #                 print(result_string)
+    #                 if type_ucm is data.ucm_all:
+    #                     f.write(f"warm, {shrink}, {k}, {simil}, all, {map}\n")
+    #                 else:
+    #                     if type_ucm is data.ucm_age:
+    #                         f.write(f"warm, {shrink}, {k}, {simil}, age, {map}\n")
+    #                     else:
+    #                         f.write(f"warm, {shrink}, {k}, {simil}, region, {map}\n")
+    #                 f.flush()
+    #                 result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, recommender)
+    #                 print(result_string)
+    #                 if type_ucm is data.ucm_all:
+    #                     f.write(f"cold, {shrink}, {k}, {simil}, all, {map}\n")
+    #                 else:
+    #                     if type_ucm is data.ucm_age:
+    #                         f.write(f"cold, {shrink}, {k}, {simil}, age, {map}\n")
+    #                     else:
+    #                         f.write(f"cold, {shrink}, {k}, {simil}, region, {map}\n")
+    #                 f.flush()
 
-                    f.flush()
-                    result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_warm_train_users, recommender)
-                    print(result_string)
-                    if type_ucm is data.ucm_all:
-                        f.write(f"warm, {shrink}, {k}, {simil}, all, {map}\n")
-                    else:
-                        if type_ucm is data.ucm_age:
-                            f.write(f"warm, {shrink}, {k}, {simil}, age, {map}\n")
-                        else:
-                            f.write(f"warm, {shrink}, {k}, {simil}, region, {map}\n")
-                    f.flush()
-                    result_string, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, recommender)
-                    print(result_string)
-                    if type_ucm is data.ucm_all:
-                        f.write(f"cold, {shrink}, {k}, {simil}, all, {map}\n")
-                    else:
-                        if type_ucm is data.ucm_age:
-                            f.write(f"cold, {shrink}, {k}, {simil}, age, {map}\n")
-                        else:
-                            f.write(f"cold, {shrink}, {k}, {simil}, region, {map}\n")
-                    f.flush()
-
-    # f = open("submission.csv", "w+")
-    # f.write("user_id,item_list\n")
-    # for user_id in data.ids_target_users:
-    #     recommended_items = recommender.recommend(user_id, cutoff=10)
-    #     well_formatted = " ".join([str(x) for x in recommended_items])
-    #     f.write(f"{user_id}, {well_formatted}\n")
+    f = open("submission.csv", "w+")
+    f.write("user_id,item_list\n")
+    for user_id in data.ids_target_users:
+        recommended_items = recommender.recommend(user_id, cutoff=10)
+        well_formatted = " ".join([str(x) for x in recommended_items])
+        f.write(f"{user_id}, {well_formatted}\n")
 
     # dataset_object = RecSys2019Reader()
     #
