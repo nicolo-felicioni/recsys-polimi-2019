@@ -62,8 +62,8 @@ if __name__ == '__main__':
     print(data.ucm_region)
     print(data.ucm_region.shape)
     # cold_recommender = TopPop(data.train_urm)
-    recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_region, data.ids_cold_user, data.ids_warm_user)
-    recommender.fit()
+    recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_all, data.ids_cold_user, data.ids_warm_user)
+    recommender.fit(epochs=800)
 
     # for user_id in data.ids_warm_user:
     #     recommended_items = recommender.recommend(user_id, cutoff=10)
@@ -86,7 +86,9 @@ if __name__ == '__main__':
     #                 logFile.flush()
 
     # recommender.fit()
-    MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender)
+
+
+    #MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender)
 
     f = open("submission.csv", "w+")
     f.write("user_id,item_list\n")
