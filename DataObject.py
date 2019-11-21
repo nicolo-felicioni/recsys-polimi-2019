@@ -27,7 +27,7 @@ class DataObject(object):
         self.icm_class = data_reader.load_icm_class()
         self.ucm_region = data_reader.load_ucm_region()
         splitter = Splitter(self.urm)
-        splitter.split_train_test(k=0, probability=0, random_seed=17)
+        splitter.split_train_test(k=1, probability=0, random_seed=17)
         self.urm_train = splitter.train_csr
         self.urm_test = splitter.test_csr
         self.ids_warm_train_users = splitter.ids_warm_train_users
@@ -40,6 +40,10 @@ class DataObject(object):
         self.number_of_cold_train_items = splitter.number_of_cold_train_items
         self.number_of_interactions_per_user = (self.urm > 0).sum(axis=0)
         self.number_of_interactions_per_item = (self.urm > 0).sum(axis=1)
+        self.number_of_region_per_user = (self.ucm_region > 0).sum(axis=1)
+        self.number_of_user_per_region = (self.ucm_region > 0).sum(axis=0)
+        self.number_of_age_per_user = (self.ucm_age > 0).sum(axis=1)
+        self.number_of_user_per_age = (self.ucm_age > 0).sum(axis=0)
 
     def clone(self):
         return copy.deepcopy(self)
@@ -53,6 +57,10 @@ class DataObject(object):
               f"number of interactions per item max: {self.number_of_interactions_per_item.max()}\n"
               f"number of interactions per user avg: {round(self.number_of_interactions_per_user.mean(), 2)}\n"
               f"number of interactions per item avg: {round(self.number_of_interactions_per_item.mean(), 2)}\n"
+              f"number of region per user max: {self.number_of_region_per_user.max()}\n"
+              f"number of user per region max: {self.number_of_user_per_region.max()}\n"
+              f"number of region per user avg: {round(self.number_of_region_per_user.mean(), 2)}\n"
+              f"number of user per region avg: {round(self.number_of_user_per_region.mean(), 2)}\n"
               f"number of warm users in urm: {self.number_of_warm_users} [{round(self.number_of_warm_users / self.number_of_users * 100, 2)}%]\n"
               f"number of warm items in urm: {self.number_of_warm_items} [{round(self.number_of_warm_items / self.number_of_items * 100, 2)}%]\n"
               f"number of cold users in urm: {self.number_of_cold_users} [{round(self.number_of_cold_users / self.number_of_users * 100, 2)}%]\n"

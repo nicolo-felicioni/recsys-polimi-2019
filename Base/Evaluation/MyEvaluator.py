@@ -53,5 +53,5 @@ def evaluate_algorithm(test, users, recommender_object, at=10):
     cumulative_recall /= num_eval
     cumulative_MAP /= num_eval
 
-    print("Recommender performance is: Precision = {:.8f}, Recall = {:.8f}, MAP = {:.8f}".format(
-        cumulative_precision, cumulative_recall, cumulative_MAP))
+    return("Recommender performance is: Precision = {:.8f}, Recall = {:.8f}, MAP = {:.8f}".format(
+        cumulative_precision, cumulative_recall, cumulative_MAP)), cumulative_MAP

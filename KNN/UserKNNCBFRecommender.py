@@ -22,7 +22,7 @@ class UserKNNCBFRecommender(BaseSimilarityMatrixRecommender):
 
     RECOMMENDER_NAME = "UserKNNCBFRecommender"
 
-    # FEATURE_WEIGHTING_VALUES = ["BM25", "TF-IDF", "none"]
+    FEATURE_WEIGHTING_VALUES = ["BM25", "TF-IDF", "none"]
 
 
     def __init__(self, UCM, URM_train):
@@ -47,8 +47,7 @@ class UserKNNCBFRecommender(BaseSimilarityMatrixRecommender):
         self.topK = topK
         self.shrink = shrink
 
-        '''
-         if feature_weighting not in self.FEATURE_WEIGHTING_VALUES:
+        if feature_weighting not in self.FEATURE_WEIGHTING_VALUES:
             raise ValueError("Value for 'feature_weighting' not recognized. Acceptable values are {}, provided was '{}'".format(self.FEATURE_WEIGHTING_VALUES, feature_weighting))
         
         if feature_weighting == "BM25":
@@ -60,7 +59,6 @@ class UserKNNCBFRecommender(BaseSimilarityMatrixRecommender):
             self.URM_train = self.URM_train.astype(np.float32)
             self.URM_train = TF_IDF(self.URM_train.T).T
             self.URM_train = check_matrix(self.URM_train, 'csr')
-        '''
 
         similarity = Compute_Similarity(self.UCM.T, shrink=shrink, topK=topK, normalize=normalize, similarity = similarity, **similarity_args)
 
