@@ -60,7 +60,7 @@ if __name__ == '__main__':
     logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
     data_reader = DataReader()
-    data = DataObject(data_reader)
+    data = DataObject(data_reader, 1)
     data.print()
 
 

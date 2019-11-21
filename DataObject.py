@@ -7,7 +7,7 @@ from scipy import sparse as sps
 
 class DataObject(object):
 
-    def __init__(self, data_reader):
+    def __init__(self, data_reader, k):
         self.data_reader = data_reader
         self.urm, self.ids_warm_user, self.ids_warm_item = data_reader.load_urm()
         self.number_of_users = self.urm.shape[0]
@@ -29,7 +29,7 @@ class DataObject(object):
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
         self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age])
         splitter = Splitter(self.urm)
-        splitter.split_train_test(k=1, probability=0, random_seed=16)
+        splitter.split_train_test(k=k, probability=0, random_seed=16)
         self.urm_train = splitter.train_csr
         self.urm_test = splitter.test_csr
         self.ids_warm_train_users = splitter.ids_warm_train_users
