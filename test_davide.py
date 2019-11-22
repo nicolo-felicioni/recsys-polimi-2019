@@ -64,9 +64,12 @@ if __name__ == '__main__':
     data.print()
 
 
+
     # cold_recommender = TopPop(data.train_urm)
-    recommender = Hybrid000AlphaRecommender(data.urm_train, data.ucm_all, data.ids_cold_user, data.ids_warm_user)
-    recommender.fit(epochs=1050, shrink=1, topK=15000, lambda_j=0.0001, lambda_i=0.0001, random_seed=42)
+    # recommender = RP3betaRecommender(data.urm_train)
+    # recommender.fit()
+    # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, recommender)
+    # print(eval)
 
     # for user_id in data.ids_warm_user:
     #     recommended_items = recommender.recommend(user_id, cutoff=10)
@@ -167,12 +170,12 @@ if __name__ == '__main__':
     #                         f.write(f"cold, {shrink}, {k}, {simil}, region, {map}\n")
     #                 f.flush()
 
-    f = open("submission.csv", "w+")
-    f.write("user_id,item_list\n")
-    for user_id in data.ids_target_users:
-        recommended_items = recommender.recommend(user_id, cutoff=10)
-        well_formatted = " ".join([str(x) for x in recommended_items])
-        f.write(f"{user_id}, {well_formatted}\n")
+    # f = open("submission.csv", "w+")
+    # f.write("user_id,item_list\n")
+    # for user_id in data.ids_target_users:
+    #     recommended_items = recommender.recommend(user_id, cutoff=10)
+    #     well_formatted = " ".join([str(x) for x in recommended_items])
+    #     f.write(f"{user_id}, {well_formatted}\n")
 
     # dataset_object = RecSys2019Reader()
     #

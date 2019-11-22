@@ -14,14 +14,16 @@ class DataObject(object):
         self.number_of_items = self.urm.shape[1]
         self.ids_user = range(0, self.number_of_users)
         self.ids_item = range(0, self.number_of_items)
-        self.ids_cold_user = [user for user in range(0, self.number_of_users) if user not in self.ids_warm_user]
-        self.ids_cold_item = [item for item in range(0, self.number_of_items) if item not in self.ids_warm_item]
+        self.ids_cold_user = np.array(
+            [user for user in range(0, self.number_of_users) if user not in self.ids_warm_user])
+        self.ids_cold_item = np.array(
+            [item for item in range(0, self.number_of_items) if item not in self.ids_warm_item])
         self.number_of_warm_users = self.ids_warm_user.shape[0]
         self.number_of_warm_items = self.ids_warm_item.shape[0]
-        self.number_of_cold_users = len(self.ids_cold_user)
-        self.number_of_cold_items = len(self.ids_cold_item)
-        self.ids_target_users = data_reader.load_target()
-        self.number_of_target_users = len(self.ids_target_users)
+        self.number_of_cold_users = self.ids_cold_user.shape[0]
+        self.number_of_cold_items = self.ids_cold_item.shape[0]
+        self.ids_target_users = np.array(data_reader.load_target())
+        self.number_of_target_users = self.ids_target_users.shape[0]
         self.icm_asset = data_reader.load_icm_asset()
         self.icm_price = data_reader.load_icm_price()
         self.icm_class = data_reader.load_icm_class()
@@ -46,6 +48,8 @@ class DataObject(object):
         self.number_of_user_per_region = (self.ucm_region > 0).sum(axis=0)
         self.number_of_age_per_user = (self.ucm_age > 0).sum(axis=1)
         self.number_of_user_per_age = (self.ucm_age > 0).sum(axis=0)
+        self.number_of_interactions_per_train_user = (self.urm_train > 0).sum(axis=0)
+        self.number_of_interactions_per_train_item = (self.urm_train > 0).sum(axis=1)
 
     def clone(self):
         return copy.deepcopy(self)
@@ -75,3 +79,63 @@ class DataObject(object):
               f"number of cold items in train urm: {self.number_of_cold_train_items} [{round(self.number_of_cold_train_items / self.number_of_items * 100, 2)}%]\n"
               f"test urm size: {self.urm_train.shape}\n"
               f"test urm interactions: {self.urm_test.nnz} [{round(self.urm_test.nnz / self.urm.nnz * 100, 2)}%]\n")
+
+    def get_number_of_users_with_less_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a < x)
+        return a[1].shape[0]
+
+    def get_ids_of_users_with_less_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a < x)
+        return a[1]
+
+    def get_number_of_train_users_with_less_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a < x)
+        return a[1].shape[0]
+
+    def get_ids_of_train_users_with_less_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a < x)
+        return a[1]
+
+    def get_number_of_users_with_more_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a > x)
+        return a[1].shape[0]
+
+    def get_ids_of_users_with_more_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a > x)
+        return a[1]
+
+    def get_number_of_train_users_with_more_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a > x)
+        return a[1].shape[0]
+
+    def get_ids_of_train_users_with_more_than_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a > x)
+        return a[1]
+
+    def get_number_of_users_with_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a == x)
+        return a[1].shape[0]
+
+    def get_ids_of_users_with_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a == x)
+        return a[1]
+
+    def get_number_of_train_users_with_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a == x)
+        return a[1].shape[0]
+
+    def get_ids_of_train_users_with_X_interactions(self, x=100):
+        a = self.number_of_interactions_per_user
+        a = np.where(a == x)
+        return a[1]

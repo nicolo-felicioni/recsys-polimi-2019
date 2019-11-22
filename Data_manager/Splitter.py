@@ -100,9 +100,9 @@ class Splitter(object):
         self.test_csr = test_csr
         self.ids_warm_train_users = np.unique(train_user)
         self.ids_warm_train_items = np.unique(train_item)
-        self.ids_cold_train_users = [user for user in test_user if user not in self.ids_warm_train_users]
-        self.ids_cold_train_items = [item for item in test_item if item not in self.ids_warm_train_items]
+        self.ids_cold_train_users = np.array([user for user in test_user if user not in self.ids_warm_train_users])
+        self.ids_cold_train_items = np.array([item for item in test_item if item not in self.ids_warm_train_items])
         self.number_of_warm_train_users = self.ids_warm_train_users.shape[0]
         self.number_of_warm_train_items = self.ids_warm_train_items.shape[0]
-        self.number_of_cold_train_users = len(self.ids_cold_train_users)
-        self.number_of_cold_train_items = len(self.ids_cold_train_users)
+        self.number_of_cold_train_users = self.ids_cold_train_users.shape[0]
+        self.number_of_cold_train_items = self.ids_cold_train_users.shape[0]
