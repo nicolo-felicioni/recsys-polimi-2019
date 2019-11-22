@@ -4,6 +4,7 @@ from DataObject import DataObject
 from DataReader import DataReader
 from Hybrid.Hybrid000AlphaRecommender import Hybrid000AlphaRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
+from MatrixFactorization.IALSRecommender import IALSRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
@@ -60,16 +61,28 @@ if __name__ == '__main__':
     logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
     data_reader = DataReader()
-    data = DataObject(data_reader, 1)
+    data = DataObject(data_reader, 1, random_seed=3)
     data.print()
 
 
 
     # cold_recommender = TopPop(data.train_urm)
-    # recommender = RP3betaRecommender(data.urm_train)
+    #IALSRecommender
+    recommender = ItemKNNCFRecommender(data.urm_train)
+    print(recommender)
+    recommender.fit(shrink=2000, topK=12, feature_weighting="TF-IDF")
+    # recommender = SLIM_BPR_Cython(data.urm_train)
+    # print(recommender)
+    # recommender.fit(epochs=500)
+    # recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
+    # print(recommender)
+    # recommender.fit(topK=12000, shrink=1)
+    # recommender = TopPop(data.urm_train)
+    # print(recommender)
     # recommender.fit()
-    # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_cold_train_users, recommender)
-    # print(eval)
+    for n, users, description in data.urm_train_users_by_type:
+        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender)
+        print(f"{description} {eval}")
 
     # for user_id in data.ids_warm_user:
     #     recommended_items = recommender.recommend(user_id, cutoff=10)
