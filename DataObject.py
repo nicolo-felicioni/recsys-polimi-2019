@@ -31,7 +31,7 @@ class DataObject(object):
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
         self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age])
         splitter = Splitter(self.urm)
-        splitter.split_train_test(k=k, probability=0, random_seed=random_seed)
+        splitter.split_train_test_check_if_stored(k=k, probability=0, random_seed=random_seed)
         self.urm_train = splitter.train_csr
         self.urm_test = splitter.test_csr
         self.ids_warm_train_users = splitter.ids_warm_train_users
