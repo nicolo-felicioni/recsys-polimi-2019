@@ -87,8 +87,7 @@ def evaluate_algorithm_parallel(test, users, recommender_object, at=10, remove_t
                 cumulative_MAP += MAP(recommended_items, relevant_items)
         return cumulative_precision, cumulative_recall, cumulative_MAP
 
-    with Parallel(n_jobs=cpu_count) as parallel:
-        results = parallel(delayed(eval_single_user)(user_id, _test=test, _at=at, _remove_top=remove_top) for user_id in userList_unique)
+    results = Parallel(n_jobs=cpu_count)(delayed(eval_single_user)(user_id, _test=test, _at=at, _remove_top=remove_top) for user_id in userList_unique)
     for result in results:
         cumulative_precision += result[0]
         cumulative_recall += result[1]
