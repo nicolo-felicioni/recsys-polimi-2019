@@ -35,16 +35,8 @@ class BaseRecommender(object):
 
         self._cold_user_mask = np.ediff1d(self.URM_train.indptr) == 0
 
-        if self._cold_user_mask.any():
-            print("{}: Detected {} ({:.2f} %) cold users.".format(
-                self.RECOMMENDER_NAME, self._cold_user_mask.sum(), self._cold_user_mask.sum()/len(self._cold_user_mask)*100))
-
-
         self._cold_item_mask = np.ediff1d(self.URM_train.tocsc().indptr) == 0
 
-        if self._cold_item_mask.any():
-            print("{}: Detected {} ({:.2f} %) cold items.".format(
-                self.RECOMMENDER_NAME, self._cold_item_mask.sum(), self._cold_item_mask.sum()/len(self._cold_item_mask)*100))
 
 
     def _get_cold_user_mask(self):

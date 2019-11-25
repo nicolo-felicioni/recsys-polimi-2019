@@ -1,4 +1,4 @@
-
+from MatrixFactorization import IALSRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
@@ -31,19 +31,19 @@ if __name__ == '__main__':
     URM_train, URM_validation, URM_test = dataSplitter.get_holdout_split()
 
     recommender_list = [
-        Random,
-        TopPop,
-        GlobalEffects,
-        UserKNNCFRecommender,
-        ItemKNNCFRecommender,
-        P3alphaRecommender,
-        RP3betaRecommender,
-        SLIM_BPR_Cython,
-        SLIMElasticNetRecommender,
-        MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        MatrixFactorization_AsySVD_Cython,
-        PureSVDRecommender,
+        IALSRecommender,
+        # TopPop,
+        # GlobalEffects,
+        # UserKNNCFRecommender,
+        # ItemKNNCFRecommender,
+        # P3alphaRecommender,
+        # RP3betaRecommender,
+        # SLIM_BPR_Cython,
+        # SLIMElasticNetRecommender,
+        # MatrixFactorization_BPR_Cython,
+        # MatrixFactorization_FunkSVD_Cython,
+        # MatrixFactorization_AsySVD_Cython,
+        # PureSVDRecommender,
         #WRMFRecommender,
     ]
 

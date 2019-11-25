@@ -1,3 +1,10 @@
+import operator
+import copy
+import math
+import time
+
+from joblib import Parallel, delayed
+
 from Base.Evaluation import MyEvaluator
 from Base.Evaluation.Evaluator import EvaluatorHoldout
 from DataObject import DataObject
@@ -5,10 +12,13 @@ from DataReader import DataReader
 from Hybrid.Hybrid000AlphaRecommender import Hybrid000AlphaRecommender
 from Hybrid.Hybrid001AlphaRecommender import Hybrid001AlphaRecommender
 from Hybrid.Hybrid003AlphaRecommender import Hybrid003AlphaRecommender
+from Hybrid.Hybrid100AlphaRecommender import Hybrid100AlphaRecommender
+from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from MatrixFactorization.IALSRecommender import IALSRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
+import random as rnd
 
 from MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, \
     MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
@@ -33,6 +43,28 @@ from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
 import traceback, os
 
 
+def mutate_weights(weights, mutation_factor=0.4, epoch=1, min_mutation=0.005, big_mutation_probability=0.005,
+                   big_mutation_factor=10):
+    weights = copy.deepcopy(weights)
+    factor = mutation_factor / math.sqrt(epoch) + min_mutation
+    partial_sum = 0
+    for row in range(len(weights)):
+        for col in range(len(weights[row])):
+            if rnd.random() < big_mutation_probability:
+                if rnd.random() < 0.5:
+                    weights[row][col] = weights[row][col] / big_mutation_factor
+                else:
+                    weights[row][col] = weights[row][col] * big_mutation_factor
+            else:
+                weights[row][col] = weights[row][col] * ((1 - factor) + rnd.random() * factor)
+            partial_sum = partial_sum + weights[row][col]
+
+    for row in range(len(weights)):
+        for col in range(len(weights[row])):
+            weights[row][col] = weights[row][col] / partial_sum
+    return weights
+
+
 def load_target():
     df_original = pd.read_csv(filepath_or_buffer="Data_manager_split_datasets/RecSys2019/alg_sample_submission.csv",
                               sep=',', header=0,
@@ -51,6 +83,7 @@ def load_target():
 
     return user_id_unique
 
+
 def make_submission():
     data_reader = DataReader()
     data = DataObject(data_reader, k=0)
@@ -63,8 +96,9 @@ def make_submission():
         well_formatted = " ".join([str(x) for x in recommended_items])
         f.write(f"{user_id}, {well_formatted}\n")
 
+
 if __name__ == '__main__':
-    want_submission = True
+    want_submission = False
 
     if want_submission:
         make_submission()
@@ -78,31 +112,70 @@ if __name__ == '__main__':
         logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
         data_reader = DataReader()
-        data = DataObject(data_reader, 1, random_seed=5)
+        data = DataObject(data_reader, 1, random_seed=15)
         data.print()
 
-
-
-        # cold_recommender = TopPop(data.train_urm)
-        #IALSRecommender
+        # recommender = TopPop(data.urm_train)
+        # recommender.fit()
+        # users = data.ids_warm_train_users
+        # eval, map = MyEvaluator.evaluate_algorithm_parallel(data.urm_test, users, recommender, at=10, remove_top=0)
+        # print(f"FIRST 10,\t {description},\t {eval}")
+        # IALSRecommender
         # recommender = ItemKNNCFRecommender(data.urm_train)
         # print(recommender)
         # shrink = 16
         # k = 12
         # fw = "none"
+        # shrink = 20000
+        # k = 20000
+        # fw = "TF-IDF"
         # print(f"shrink {shrink}, k {k}, fw {fw}")
         # recommender.fit(shrink=shrink, topK=k, feature_weighting=fw)
         # recommender = SLIM_BPR_Cython(data.urm_train)
         # print(recommender)
-        # recommender.fit(epochs=500)
+        # recommender.fit(epochs=10000, learning_rate=0.000001, lambda_i=0.1, lambda_j=0.1)
         # recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
         # print(recommender)
         # recommender.fit(topK=12000, shrink=1)
-        recommender = Hybrid003AlphaRecommender(data)
+        # recommender = Hybrid003AlphaRecommender(data)
+        # recommender.fit()
+
+        recommender = Hybrid100AlphaRecommender(data)
         recommender.fit()
         for n, users, description in data.urm_train_users_by_type:
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender)
-            print(f"{description} {eval}")
+            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=0)
+            print(f"FIRST 5,\t {description},\t {eval}")
+        for n, users, description in data.urm_train_users_by_type:
+            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=5)
+            print(f"LAST 5,\t {description},\t {eval}")
+        for n, users, description in data.urm_train_users_by_type:
+            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+            print(f"ALL 10,\t {description},\t {eval}")
+        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender, at=10,
+                                                   remove_top=0)
+        print(f"TOTAL,\t \t {eval}")
+
+        # RECOMMENDER CHALLENGE
+        # rec1 = ItemKNNCFRecommender(data.urm_train)
+        # rec1.fit(shrink=20000, topK=20000, feature_weighting="TF-IDF")
+        # rec2 = P3alphaRecommender(data.urm_train)
+        # rec2.fit(topK=1000, implicit=True, alpha=0.4)
+        # rec1 = TopPop(data.urm_train)
+        # rec1.fit()
+        # rec2 = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
+        # rec2.fit(topK=11000, shrink=1)
+        # rec2 = SLIM_BPR_Cython(data.urm_train)
+        # rec2.fit(epochs=1000, lambda_i=0.1, lambda_j=0.1)
+        # for n, users, description in data.urm_train_users_by_type:
+        #     size = 0
+        #     for user_id in users:
+        #         recommended_items1 = rec1.recommend(user_id, cutoff=10)
+        #         recommended_items2 = rec2.recommend(user_id, cutoff=10)
+        #         items = np.concatenate((recommended_items1, recommended_items2))
+        #         size = size + np.unique(items).shape[0]
+        #     average_size = size/n
+        #
+        #     print(f"ALL 10,\t {description},\t {average_size}")
 
         # for user_id in data.ids_warm_user:
         #     recommended_items = recommender.recommend(user_id, cutoff=10)
@@ -264,3 +337,105 @@ if __name__ == '__main__':
         #         traceback.print_exc()
         #         logFile.write("Algorithm: {} - Exception: {}\n".format(recommender_class, str(e)))
         #         logFile.flush()
+
+        # f = open("generation_log.csv", "w+")
+        #
+        # population_size = 6
+        # epochs = 3
+        # score = [None] * population_size
+        # anti_overfitting = 2
+        #
+        # # recommenders[population_id][anti_overfitting_generation]
+        # recommenders = np.full((population_size, anti_overfitting), None)
+        # # base_recommenders[anti_overfitting_generation]
+        # base_recommenders = []
+        # tested_recommenders = []
+        # datas = [None] * anti_overfitting
+        #
+        # for j in range(anti_overfitting):
+        #     data_reader = DataReader()
+        #     datas[j] = DataObject(data_reader, 1, random_seed=(50 + j*10))
+        #     rec1 = ItemKNNCFRecommender(datas[j].urm_train)
+        #     rec1.fit(shrink=15, topK=12, feature_weighting="none")
+        #     rec2 = P3alphaRecommender(datas[j].urm_train)
+        #     rec2.fit(topK=170, implicit=True, alpha=0.5)
+        #     rec3 = PureSVDRecommender(datas[j].urm_train)
+        #     rec3.fit(num_factors=20)
+        #     base_recommenders.append([rec1, rec2, rec3])
+        #
+        # for i in range(population_size):
+        #     weights = []
+        #     weights.append([x / 15 for x in range(1, 20)][::-1])
+        #     weights.append([x / 15 for x in range(1, 20)][::-1])
+        #     weights.append([x / 15 for x in range(1, 20)][::-1])
+        #     for j in range(anti_overfitting):
+        #         rec = Hybrid1XXAlphaRecommender(datas[j], base_recommenders[j])
+        #         rec.fit(weights=weights)
+        #         recommenders[i][j] = rec
+        #
+        # for i in range(population_size):
+        #     ws = mutate_weights(recommenders[i][0].weights)
+        #     for j in range(anti_overfitting):
+        #         recommenders[i][j].fit(weights=ws)
+        #
+        # start_time = time.time()
+        #
+        # for epoch in range(epochs):
+        #     print(f"epoch {epoch}")
+        #     f.write(f"epoch {epoch}\n")
+        #     print("Epoch {} of {} complete in {:.2f} minutes".format(epoch, epochs,
+        #                                                              float(time.time() - start_time) / 60))
+        #     f.write("Epoch {} of {} complete in {:.2f} minutes".format(epoch, epochs,
+        #                                                              float(time.time() - start_time) / 60))
+        #     start_time = time.time()
+        #
+        #     for i in range(population_size):
+        #         # partial_score = 0
+        #         def parallel_run(j):
+        #             _rec = recommenders[i][j]
+        #             _n, _tested_users, _description = datas[j].urm_train_users_by_type[9]
+        #             _result_string, _map = MyEvaluator.evaluate_algorithm_parallel(datas[j].urm_test, _tested_users, _rec)
+        #             print(f"\t\t{j} map : {_map}")
+        #             f.write(f"\t\t{j} map : {_map}\n")
+        #             return _map
+        #         partial_scores = Parallel(n_jobs=anti_overfitting)(delayed(parallel_run)(generation) for generation in range(anti_overfitting))
+        #         average_score = 0
+        #         for s in partial_scores:
+        #             average_score += s
+        #         average_score = average_score / anti_overfitting
+        #
+        #
+        #
+        #         # for j in range(anti_overfitting):
+        #         #     rec = recommenders[i][j]
+        #         #     n, tested_users, description = datas[j].urm_train_users_by_type[2]
+        #         #     result_string, map = MyEvaluator.evaluate_algorithm_parallel(datas[j].urm_test, tested_users, rec)
+        #         #     partial_score = partial_score + map
+        #         #     print(f"\t\t{j} map : {map}")
+        #         #     f.write(f"\t\t{j} map : {map}\n")
+        #         # average_score = partial_score / anti_overfitting
+        #         print(f"average_map : {average_score}")
+        #         f.write(f"average_map : {average_score}\n")
+        #         f.flush()
+        #         score[int(i)] = (average_score, recommenders[i][0])
+        #
+        #     # sort the recommenders by their average scores
+        #     sorted_scores = sorted(score, key=operator.itemgetter(0), reverse=True)
+        #     # take the best ones
+        #     best_recs = [t[1] for t in sorted_scores][:int(population_size / 2)]
+        #
+        #     if epoch != (epochs-1):
+        #         for i in range(int(population_size / 2)):
+        #             ws = mutate_weights(best_recs[i].weights, epoch=epoch+1)
+        #             new_ws = mutate_weights(ws, epoch=epoch+1)
+        #             for j in range(anti_overfitting):
+        #                 recommenders[i * 2][j] = Hybrid1XXAlphaRecommender(datas[j], base_recommenders[j])
+        #                 recommenders[i * 2][j].weights = copy.deepcopy(ws)
+        #                 new_rec = Hybrid1XXAlphaRecommender(datas[j], base_recommenders[j])
+        #                 new_rec.weights = copy.deepcopy(new_ws)
+        #                 recommenders[i * 2 + 1][j] = new_rec
+        #
+        # for i in range(int(population_size)):
+        #     f.write(f"{recommenders[i][0].weights[0]}\n")
+        #     f.write(f"{recommenders[i][0].weights[1]}\n")
+        #     f.flush()
