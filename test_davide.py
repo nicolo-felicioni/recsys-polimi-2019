@@ -5,7 +5,7 @@ import time
 
 from joblib import Parallel, delayed
 
-from Base.Evaluation import MyEvaluator
+from Base.Evaluation import MyEvaluator, LogToFileEvaluator
 from Base.Evaluation.Evaluator import EvaluatorHoldout
 from DataObject import DataObject
 from DataReader import DataReader
@@ -111,8 +111,10 @@ if __name__ == '__main__':
 
         logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
+        random_seed = 15
+
         data_reader = DataReader()
-        data = DataObject(data_reader, 1, random_seed=15)
+        data = DataObject(data_reader, 1, random_seed=random_seed)
         data.print()
 
         # recommender = TopPop(data.urm_train)
@@ -140,20 +142,37 @@ if __name__ == '__main__':
         # recommender = Hybrid003AlphaRecommender(data)
         # recommender.fit()
 
-        recommender = Hybrid100AlphaRecommender(data)
-        recommender.fit()
-        for n, users, description in data.urm_train_users_by_type:
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=0)
-            print(f"FIRST 5,\t {description},\t {eval}")
-        for n, users, description in data.urm_train_users_by_type:
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=5)
-            print(f"LAST 5,\t {description},\t {eval}")
-        for n, users, description in data.urm_train_users_by_type:
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-            print(f"ALL 10,\t {description},\t {eval}")
-        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender, at=10,
-                                                   remove_top=0)
-        print(f"TOTAL,\t \t {eval}")
+        # for n, users, description in data.urm_train_users_by_type:
+        #     print(f"{n} {users} {description}")
+
+        # recommender = PureSVDRecommender(data)
+        # recommender.fit(num_factors=5)
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=0)
+        #     print(f"FIRST 5,\t {description},\t {eval}")
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=5, remove_top=5)
+        #     print(f"LAST 5,\t {description},\t {eval}")
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender, at=10,
+        #                                            remove_top=0)
+
+
+        # print(f"TOTAL,\t \t {eval}")
+        recommender = PureSVDRecommender(data.urm_train)
+        recommender.fit(num_factors=5)
+
+        LogToFileEvaluator.evaluate(data, random_seed, recommender, "PureSVD", "num_factors=5")
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm_parallel(data.urm_test, users, recommender, at=10, remove_top=0, parallelism=2)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_target_users, recommender, at=10,
+        #                                            remove_top=0)
+        # print(f"TOTAL,\t \t {eval}")
+
+
 
         # RECOMMENDER CHALLENGE
         # rec1 = ItemKNNCFRecommender(data.urm_train)

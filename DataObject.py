@@ -29,7 +29,7 @@ class DataObject(object):
         self.icm_class = data_reader.load_icm_class()
         self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
-        self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age])
+        self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age]).tocsr()
         splitter = Splitter(self.urm)
         splitter.split_train_test_check_if_stored(k=k, probability=0, random_seed=random_seed)
         self.urm_train = splitter.train_csr
@@ -110,6 +110,8 @@ class DataObject(object):
                                                  (self.get_number_of_train_users_with_from_X_to_Y_interactions(31),
                                                   self.get_ids_of_train_users_with_more_than_X_interactions(31),
                                                  "train users with [31, ) interactions")])
+        self.ids_ultra_cold_users = np.array([x for x in self.ids_cold_user if self.ucm_all[x].indices.shape[0] == 0])
+        self.number_of_ultra_cold_users = self.ids_ultra_cold_users.shape[0]
 
     def clone(self):
         return copy.deepcopy(self)
@@ -161,12 +163,12 @@ class DataObject(object):
     def get_number_of_train_users_with_less_than_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a < x)
-        return a[0].shape[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user]).shape[0]
 
     def get_ids_of_train_users_with_less_than_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a < x)
-        return a[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user])
 
     def get_number_of_users_with_more_than_X_interactions(self, x=100):
         a = self.number_of_interactions_per_user
@@ -181,12 +183,12 @@ class DataObject(object):
     def get_number_of_train_users_with_more_than_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a > x)
-        return a[0].shape[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user]).shape[0]
 
     def get_ids_of_train_users_with_more_than_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a > x)
-        return a[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user])
 
     def get_number_of_users_with_X_interactions(self, x=100):
         a = self.number_of_interactions_per_user
@@ -201,12 +203,12 @@ class DataObject(object):
     def get_number_of_train_users_with_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a == x)
-        return a[0].shape[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user]).shape[0]
 
     def get_ids_of_train_users_with_X_interactions(self, x=100):
         a = self.number_of_interactions_per_train_user
         a = np.where(a == x)
-        return a[0]
+        return np.array([x for x in a[0] if x not in self.ids_cold_user])
 
     def get_number_of_users_with_from_X_to_Y_interactions(self, x=100, y=200):
         a = self.number_of_interactions_per_user
@@ -224,10 +226,10 @@ class DataObject(object):
         a = self.number_of_interactions_per_train_user
         x1 = np.where(a >= x)
         x2 = np.where(a <= y)
-        return np.array([x for x in x1[0] if x in x2[0]]).shape[0]
+        return np.array([x for x in x1[0] if x in x2[0] and x not in self.ids_cold_user]).shape[0]
 
     def get_ids_of_train_users_with_from_X_to_Y_interactions(self, x=100, y=200):
         a = self.number_of_interactions_per_train_user
         x1 = np.where(a >= x)
         x2 = np.where(a <= y)
-        return np.array([x for x in x1[0] if x in x2[0]])
+        return np.array([x for x in x1[0] if x in x2[0] and x not in self.ids_cold_user])
