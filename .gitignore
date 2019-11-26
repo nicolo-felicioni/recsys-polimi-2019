@@ -117,5 +117,7 @@ venv.bak/
 
 #Ignore inputs
 .Data_manager_split_datasets/*
+stored_matrices/*
+*.csv
 
 run_compile_all_cython.txt
