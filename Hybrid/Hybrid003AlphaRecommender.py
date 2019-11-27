@@ -31,8 +31,8 @@ class Hybrid003AlphaRecommender(BaseRecommender):
     def fit(self):
         self.poco_warm_recommender.fit()
         self.quasi_warm_recommender.fit()
-        self.warm_recommender.fit(topK=12, shrink=15, feature_weighting="none")
-        self.tanto_warm_recommender.fit(topK=12, shrink=15, feature_weighting="none", similarity="jaccard")
+        self.warm_recommender.fit(topK=12, shrink=15, feature_weighting="none", similarity="tanimoto")
+        self.tanto_warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
         self.cold_recommender.fit(topK=11000, shrink=1)
         self.warm_8_recommender.fit()
         self.warm_9_recommender.fit()
