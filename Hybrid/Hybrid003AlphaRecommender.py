@@ -4,6 +4,7 @@ from Data_manager.DataReader import DataReader
 from GraphBased.P3alphaRecommender import P3alphaRecommender
 from Hybrid.Hybrid100AlphaRecommender import Hybrid100AlphaRecommender
 from Hybrid.Hybrid101AlphaRecommender import Hybrid101AlphaRecommender
+from Hybrid.Hybrid102AlphaRecommender import Hybrid102AlphaRecommender
 from Hybrid.Hybrid108AlphaRecommender import Hybrid108AlphaRecommender
 from Hybrid.Hybrid109AlphaRecommender import Hybrid109AlphaRecommender
 from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
@@ -20,20 +21,20 @@ class Hybrid003AlphaRecommender(BaseRecommender):
     def __init__(self, data: DataObject):
         super(Hybrid003AlphaRecommender, self).__init__(data.urm_train)
         self.data = data
-        self.poco_warm_recommender = Hybrid100AlphaRecommender(data)
-        self.quasi_warm_recommender = Hybrid101AlphaRecommender(data)
+        self.poco_warm_recommender = Hybrid101AlphaRecommender(data)
+        self.quasi_warm_recommender = Hybrid102AlphaRecommender(data)
         self.warm_recommender = ItemKNNCFRecommender(data.urm_train)
         self.tanto_warm_recommender = ItemKNNCFRecommender(data.urm_train)
         self.warm_8_recommender = Hybrid108AlphaRecommender(data)
         self.warm_9_recommender = Hybrid109AlphaRecommender(data)
-        self.cold_recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
+        self.cold_recommender = Hybrid100AlphaRecommender(data)
 
     def fit(self):
         self.poco_warm_recommender.fit()
         self.quasi_warm_recommender.fit()
-        self.warm_recommender.fit(topK=12, shrink=15, feature_weighting="none")
+        self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
         self.tanto_warm_recommender.fit(topK=12, shrink=15, feature_weighting="none", similarity="jaccard")
-        self.cold_recommender.fit(topK=11000, shrink=1)
+        self.cold_recommender.fit()
         self.warm_8_recommender.fit()
         self.warm_9_recommender.fit()
 

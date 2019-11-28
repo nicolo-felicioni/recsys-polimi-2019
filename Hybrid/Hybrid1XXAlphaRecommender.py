@@ -22,23 +22,22 @@ class Hybrid1XXAlphaRecommender(BaseRecommender):
 
     RECOMMENDER_NAME = "Hybrid1XXAlphaRecommender"
 
-    def __init__(self, data: DataObject, recommenders):
+    def __init__(self, data: DataObject, recommenders, max_cutoff=30):
         super(Hybrid1XXAlphaRecommender, self).__init__(data.urm_train)
         self.data = data
         self.recommenders = recommenders
         self.weights = []
-        self.coeff = 1.2
+        self.max_cutoff = max_cutoff
 
-    def fit(self, coeff=1.2, weights=None):
+    def fit(self, weights=None):
         self.weights = weights
-        self.coeff=coeff
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):
         recommended_items = []
         weighted_item = {}
         for rec in self.recommenders:
-            recommended_items.append(np.array(rec.recommend(user_id_array, cutoff=int(cutoff * self.coeff))))
+            recommended_items.append(np.array(rec.recommend(user_id_array, cutoff=int(self.max_cutoff))))
         for i in range(0, len(recommended_items)):
             for j in range(0, len(recommended_items[i])):
                 weighted_item[recommended_items[i][j]] =\

@@ -28,12 +28,12 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((rating_id_list, (user_id_list, item_id_list)))
 
-        print("DataReader:")
-        print("\tLoading the URM:")
-        print("\t\tURM size:" + str(csr_matrix.shape))
-        print("\t\tURM unique users:" + str(user_id_unique.size))
-        print("\t\tURM unique items:" + str(item_id_unique.size))
-        print("\tURM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the URM:")
+        # print("\t\tURM size:" + str(csr_matrix.shape))
+        # print("\t\tURM unique users:" + str(user_id_unique.size))
+        # print("\t\tURM unique items:" + str(item_id_unique.size))
+        # print("\tURM loaded.")
 
         return csr_matrix, user_id_unique, item_id_unique
 
@@ -47,10 +47,10 @@ class DataReader(object):
 
         user_id_unique = np.unique(user_id_list)
 
-        print("DataReader:")
-        print("\tLoading the target users:")
-        print("\t\tTarget size:" + str(user_id_unique.shape))
-        print("\tTarget users loaded.")
+        # print("DataReader:")
+        # print("\tLoading the target users:")
+        # print("\t\tTarget size:" + str(user_id_unique.shape))
+        # print("\tTarget users loaded.")
 
         return user_id_unique
 
@@ -66,10 +66,10 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
 
-        print("DataReader:")
-        print("\tLoading the asset ICM: " + icm_asset_path)
-        print("\t\tAsset ICM size:" + str(csr_matrix.shape))
-        print("\tAsset ICM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the asset ICM: " + icm_asset_path)
+        # print("\t\tAsset ICM size:" + str(csr_matrix.shape))
+        # print("\tAsset ICM loaded.")
 
         return csr_matrix
 
@@ -85,10 +85,10 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
 
-        print("DataReader:")
-        print("\tLoading the price ICM: " + icm_asset_path)
-        print("\t\tPrice ICM size:" + str(csr_matrix.shape))
-        print("\tPrice ICM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the price ICM: " + icm_asset_path)
+        # print("\t\tPrice ICM size:" + str(csr_matrix.shape))
+        # print("\tPrice ICM loaded.")
 
         return csr_matrix
 
@@ -104,10 +104,10 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
 
-        print("DataReader:")
-        print("\tLoading the class ICM: " + icm_asset_path)
-        print("\t\tClass ICM size:" + str(csr_matrix.shape))
-        print("\tClass ICM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the class ICM: " + icm_asset_path)
+        # print("\t\tClass ICM size:" + str(csr_matrix.shape))
+        # print("\tClass ICM loaded.")
 
         return csr_matrix
 
@@ -123,10 +123,10 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)), shape=[n, max(feature_id_list)+1])
 
-        print("DataReader:")
-        print("\tLoading the region UCM: " + icm_asset_path)
-        print("\t\tRegion UCM size:" + str(csr_matrix.shape))
-        print("\tRegion UCM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the region UCM: " + icm_asset_path)
+        # print("\t\tRegion UCM size:" + str(csr_matrix.shape))
+        # print("\tRegion UCM loaded.")
 
         return csr_matrix
 
@@ -142,10 +142,10 @@ class DataReader(object):
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)), shape=[n, max(feature_id_list)+1])
 
-        print("DataReader:")
-        print("\tLoading the age UCM: " + icm_asset_path)
-        print("\t\tAge UCM size:" + str(csr_matrix.shape))
-        print("\tAge UCM loaded.")
+        # print("DataReader:")
+        # print("\tLoading the age UCM: " + icm_asset_path)
+        # print("\t\tAge UCM size:" + str(csr_matrix.shape))
+        # print("\tAge UCM loaded.")
 
         return csr_matrix
 
