@@ -19,7 +19,7 @@ class Hybrid1CXAlphaRecommender(BaseRecommender):
         super(Hybrid1CXAlphaRecommender, self).__init__(data.urm_train)
         self.data = data
         self.weights = []
-        self.coeff = 1.2
+        self.max_cutoff=max_cutoff
         self.cached_recommendation_all = []
         for rec in recommenders:
             cached_recommendation = {}
@@ -37,7 +37,7 @@ class Hybrid1CXAlphaRecommender(BaseRecommender):
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):
         recommended_items = []
         weighted_item = {}
-        limit = int(cutoff * self.coeff)
+        limit = self.max_cutoff
         for cached_recommendation in self.cached_recommendation_all:
             recommended_items.append(cached_recommendation[user_id_array])
         for i in range(0, len(recommended_items)):

@@ -4,6 +4,7 @@ from DataObject import DataObject
 from Data_manager.DataReader import DataReader
 from GraphBased.P3alphaRecommender import P3alphaRecommender
 from GraphBased.RP3betaRecommender import RP3betaRecommender
+from Hybrid.Hybrid1CXAlphaRecommender import Hybrid1CXAlphaRecommender
 from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
 from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
@@ -24,7 +25,13 @@ class Hybrid100AlphaRecommender(BaseRecommender):
         self.rec2 = TopPop(data.urm_train)
         self.rec1.fit(shrink=1, topK=11000)
         self.rec2.fit()
-        self.hybrid_rec = Hybrid1XXAlphaRecommender(data, recommenders=[self.rec1, self.rec2], max_cutoff=30)
+        cold = data.ids_cold_user
+        train_cold = data.urm_train_users_by_type[0][1]
+        if train_cold.shape[0] > 0:
+            target_users = np.append(cold, train_cold)
+        else:
+            target_users = cold
+        self.hybrid_rec = Hybrid1CXAlphaRecommender(data, recommenders=[self.rec1, self.rec2],  recommended_users=target_users, max_cutoff=20)
 
     def fit(self):
         weights = [[19.53, 11.84, 14.84, 12.36, 12.56, 12.07, 7.57, 6.79, 7.47, 7.12, 7.74, 5.74,
@@ -41,7 +48,7 @@ class Hybrid100AlphaRecommender(BaseRecommender):
         #             12.5, 10.75, 11.75, 14., 8.5, 6.5, 6.5, 3.75, 1.75,
         #             6.25, 7.25, 6.25, 8.5, 1.75, 7., 5.5, 6.25, 5.5,
         #             4.25, 3., 4.5]]
-        self.hybrid_rec.fit(weights=weights)
+        self.hybrid_rec.weights = weights
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):

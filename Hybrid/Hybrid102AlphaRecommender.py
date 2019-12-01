@@ -3,6 +3,8 @@ from Base.NonPersonalizedRecommender import TopPop
 from DataObject import DataObject
 from Data_manager.DataReader import DataReader
 from GraphBased.P3alphaRecommender import P3alphaRecommender
+from GraphBased.RP3betaRecommender import RP3betaRecommender
+from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
 from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
@@ -10,16 +12,34 @@ import numpy as np
 import operator
 
 
-def fib(n):
-    if n == 0:
-        return [0]
-    elif n == 1:
-        return [0, 1]
-    else:
-        lst = fib(n - 1)
-        lst.append(lst[-1] + lst[-2])
-        return lst
-
+# class Hybrid102AlphaRecommender(BaseRecommender):
+#     """Hybrid102AlphaRecommender recommender"""
+#
+#     RECOMMENDER_NAME = "Hybrid102AlphaRecommender"
+#
+#     def __init__(self, data: DataObject):
+#         super(Hybrid102AlphaRecommender, self).__init__(data.urm_train)
+#         self.data = data
+#         self.rec1 = SLIM_BPR_Cython(data.urm_train)
+#         self.rec2 = ItemKNNCFRecommender(data.urm_train)
+#         self.rec3 = RP3betaRecommender(data.urm_train)
+#         self.rec1.fit(sgd_mode="adagrad", topK=15000, epochs=250, learning_rate=1e-05, lambda_i=0.01, lambda_j=0.01)
+#         self.rec2.fit(topK=10000, shrink=10000, feature_weighting="TF-IDF")
+#         self.rec3.fit(topK=10000, alpha=0.55, beta=0.01, implicit=True, normalize_similarity=True)
+#         self.hybrid_rec = Hybrid1XXAlphaRecommender(data, recommenders=[self.rec1, self.rec2, self.rec3], max_cutoff=20)
+#
+#     def fit(self):
+#         weights = [[129.1, 66.6, 37.6, 32.3, 21., 15.9, 13.8, 13.3, 10.6, 11.5, 10.7, 10.5,
+#                     11.5, 9.7, 8.9, 8.2, 8.5, 8.7, 7.3, 7.4],
+#                    [133.9, 66., 41.2, 28., 22.3, 16.7, 15.2, 14., 12.3, 12.2, 12.2, 13.,
+#                     13.7, 12.3, 7.2, 9.1, 9.7, 11.6, 8.6, 9.3],
+#                    [120.5, 58.3, 36.2, 31.8, 21.1, 18.4, 14.9, 13.2, 15.1, 14.3, 9.1, 9.,
+#                     10., 7.9, 9.1, 8.3, 9.7, 6.5, 6.8, 7.4]]
+#         self.hybrid_rec.fit(weights=weights)
+#
+#     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
+#                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):
+#         return self.hybrid_rec.recommend(user_id_array=user_id_array, cutoff=cutoff)
 
 class Hybrid102AlphaRecommender(BaseRecommender):
     """Hybrid101AlphaRecommender recommender"""
