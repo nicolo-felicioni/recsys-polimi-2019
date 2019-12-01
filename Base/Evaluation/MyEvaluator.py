@@ -3,9 +3,11 @@ from threading import Thread
 
 import numpy as np
 from multiprocessing import Pool
-
+import ml_metrics
+import sklearn
 from joblib import Parallel, delayed
 import multiprocessing
+import ml_metrics
 
 
 def precision(recommended_items, relevant_items):
@@ -42,7 +44,6 @@ def calc(recommended_items, relevant_items):
     p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(is_relevant.shape[0]))
 
     map_score = np.sum(p_at_k) / np.min([relevant_items.shape[0], is_relevant.shape[0]])
-
     return precision_score, recall_score, map_score
 
 # We pass as paramether the recommender class

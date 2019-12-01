@@ -26,7 +26,11 @@ class DataObject(object):
         self.number_of_target_users = self.ids_target_users.shape[0]
         self.icm_asset = data_reader.load_icm_asset()
         self.icm_price = data_reader.load_icm_price()
+        self.icm_asset_augmented = data_reader.load_icm_asset_augmented()
+        self.icm_price_augmented = data_reader.load_icm_price_augmented()
         self.icm_class = data_reader.load_icm_class()
+        self.icm_all = sps.hstack([self.icm_asset, self.icm_price, self.icm_class]).tocsr()
+        self.icm_all_augmented = sps.hstack([self.icm_asset_augmented, self.icm_price_augmented, self.icm_class]).tocsr()
         self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
         self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age]).tocsr()
@@ -233,3 +237,37 @@ class DataObject(object):
         x1 = np.where(a >= x)
         x2 = np.where(a <= y)
         return np.array([x for x in x1[0] if x in x2[0] and x not in self.ids_cold_user])
+
+    def remove_close_to_cold_item_interactions(self, min_interactions=1):
+        urm = self.urm.tocsc()
+        a = self.number_of_interactions_per_item
+        to_be_saved = np.where(a > min_interactions)[1]
+
+        item_list = []
+        user_list = []
+        data_list = []
+
+        for item_id in to_be_saved:
+            for user_id in urm.getcol(item_id).indices:
+                item_list.append(item_id)
+                user_list.append(user_id)
+                data_list.append(1)
+
+        self.urm = sps.csr_matrix((data_list, (user_list, item_list)), shape=(self.number_of_users, self.number_of_items))
+
+
+        urm_train = self.urm_train.tocsc()
+        a = self.number_of_interactions_per_train_item
+        to_be_saved = np.where(a > min_interactions)[1]
+
+        item_list = []
+        user_list = []
+        data_list = []
+
+        for item_id in to_be_saved:
+            for user_id in urm_train.getcol(item_id).indices:
+                item_list.append(item_id)
+                user_list.append(user_id)
+                data_list.append(1)
+
+        self.urm_train = sps.csr_matrix((data_list, (user_list, item_list)), shape=(self.number_of_users, self.number_of_items))

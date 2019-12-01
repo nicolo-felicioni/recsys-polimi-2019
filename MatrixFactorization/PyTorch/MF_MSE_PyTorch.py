@@ -8,7 +8,7 @@ Created on 06/07/2018
 
 
 from Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
-from Base.Recommender import Recommender
+from Base.BaseRecommender import BaseRecommender
 import os, sys
 import numpy as np, pickle
 
@@ -24,12 +24,12 @@ from torch.utils.data import DataLoader
 
 
 
-class MF_MSE_PyTorch(Recommender, Incremental_Training_Early_Stopping):
+class MF_MSE_PyTorch(BaseRecommender, Incremental_Training_Early_Stopping):
 
     RECOMMENDER_NAME = "MF_MSE_PyTorch_Recommender"
 
 
-    def __init__(self, URM_train, positive_threshold=4, URM_validation = None):
+    def __init__(self, URM_train, positive_threshold=4):
 
 
         super(MF_MSE_PyTorch, self).__init__()
@@ -41,12 +41,6 @@ class MF_MSE_PyTorch(Recommender, Incremental_Training_Early_Stopping):
         self.normalize = False
 
         self.positive_threshold = positive_threshold
-
-        if URM_validation is not None:
-            self.URM_validation = URM_validation.copy()
-        else:
-            self.URM_validation = None
-
 
         self.compute_item_score = self.compute_score_MF
 
@@ -66,17 +60,8 @@ class MF_MSE_PyTorch(Recommender, Incremental_Training_Early_Stopping):
 
 
     def fit(self, epochs=30, batch_size = 128, num_factors=10,
-            learning_rate = 0.001,
-            stop_on_validation = False, lower_validatons_allowed = 5, validation_metric = "MAP",
-            evaluator_object = None, validation_every_n = 1, use_cuda = True):
-
-
-
-        if evaluator_object is None and self.URM_validation is not None:
-            from Base.Evaluation.Evaluator import SequentialEvaluator
-
-            evaluator_object = SequentialEvaluator(self.URM_validation, [10])
-
+            learning_rate = 0.001, use_cuda = True,
+            **earlystopping_kwargs):
 
 
         self.n_factors = num_factors
@@ -129,16 +114,16 @@ class MF_MSE_PyTorch(Recommender, Incremental_Training_Early_Stopping):
 
         ########################################################################################################
 
-
-        self._train_with_early_stopping(epochs, validation_every_n, stop_on_validation,
-                                    validation_metric, lower_validatons_allowed, evaluator_object,
-                                    algorithm_name = "MF_MSE_PyTorch")
-
-
-        self.W = self.W_best.copy()
-        self.H = self.H_best.copy()
+        self._train_with_early_stopping(epochs,
+                                        algorithm_name = self.RECOMMENDER_NAME,
+                                        **earlystopping_kwargs)
 
 
+        self.ITEM_factors = self.W_best.copy()
+        self.USER_factors = self.H_best.copy()
+
+        self._print("Computing NMF decomposition... Done!")
+        
         sys.stdout.flush()
 
 
@@ -197,54 +182,3 @@ class MF_MSE_PyTorch(Recommender, Incremental_Training_Early_Stopping):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def writeCurrentConfig(self, currentEpoch, results_run, logFile):
-
-        current_config = {'learn_rate': self.learning_rate,
-                          'num_factors': self.n_factors,
-                          'batch_size': 1,
-                          'epoch': currentEpoch}
-
-        print("Test case: {}\nResults {}\n".format(current_config, results_run))
-
-        sys.stdout.flush()
-
-        if (logFile != None):
-            logFile.write("Test case: {}, Results {}\n".format(current_config, results_run))
-            logFile.flush()
-
-
-
-
-
-    def saveModel(self, folder_path, file_name = None):
-
-        if file_name is None:
-            file_name = self.RECOMMENDER_NAME
-
-        print("{}: Saving model in file '{}'".format(self.RECOMMENDER_NAME, folder_path + file_name))
-
-
-        dictionary_to_save = {"W": self.W,
-                              "H": self.H}
-
-
-        pickle.dump(dictionary_to_save,
-                    open(folder_path + file_name, "wb"),
-                    protocol=pickle.HIGHEST_PROTOCOL)
-
-        np.savez(folder_path + "{}.npz".format(file_name), W = self.W, H = self.H)
-
-

@@ -148,7 +148,7 @@ class Splitter(object):
         self.number_of_warm_train_users = self.ids_warm_train_users.shape[0]
         self.number_of_warm_train_items = self.ids_warm_train_items.shape[0]
         self.number_of_cold_train_users = self.ids_cold_train_users.shape[0]
-        self.number_of_cold_train_items = self.ids_cold_train_users.shape[0]
+        self.number_of_cold_train_items = self.ids_cold_train_items.shape[0]
 
     def _saveList(self, filename, myList):
         # the filename should mention the extension 'npy'

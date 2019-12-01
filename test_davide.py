@@ -6,9 +6,10 @@ import time
 from joblib import Parallel, delayed
 
 from Base.Evaluation import MyEvaluator, LogToFileEvaluator
-from Base.Evaluation.Evaluator import EvaluatorHoldout
+from Base.Evaluation.Evaluator import EvaluatorHoldout, Evaluator
 from DataObject import DataObject
 from DataReader import DataReader
+from FeatureWeighting.CFW_D_Similarity_Linalg import CFW_D_Similarity_Linalg
 from Hybrid.Hybrid000AlphaRecommender import Hybrid000AlphaRecommender
 from Hybrid.Hybrid001AlphaRecommender import Hybrid001AlphaRecommender
 from Hybrid.Hybrid003AlphaRecommender import Hybrid003AlphaRecommender
@@ -19,6 +20,8 @@ from Hybrid.Hybrid109AlphaRecommender import Hybrid109AlphaRecommender
 from Hybrid.Hybrid1CXAlphaRecommender import Hybrid1CXAlphaRecommender
 from Hybrid.Hybrid1CYAlphaRecommender import Hybrid1CYAlphaRecommender
 from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
+from KNN.ItemKNNCBFOnlyColdRecommender import ItemKNNCBFOnlyColdRecommender
+from KNN.ItemKNNSimilarityHybridRecommender import ItemKNNSimilarityHybridRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from MatrixFactorization.IALSRecommender import IALSRecommender
 from MatrixFactorization.MatrixFactorization_BPR_Theano import MatrixFactorization_BPR_Theano
@@ -96,6 +99,7 @@ def load_target():
 def make_submission():
     data_reader = DataReader()
     data = DataObject(data_reader, k=0, random_seed=999)
+    data.urm_train = data.urm
     recommender = Hybrid003AlphaRecommender(data)
     recommender.fit()
     f = open("submission.csv", "w+")
@@ -122,37 +126,179 @@ if __name__ == '__main__':
 
         logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
-        # random_seed = 1
+        random_seed = 1
+
+        data_reader = DataReader()
+        data = DataObject(data_reader, 1, random_seed=random_seed)
+        data.print()
+
+        # r1 = ItemKNNCFRecommender(data.urm_train)
+        # r1.fit(shrink=30, topK=30, similarity="tanimoto")
+        # s1= r1.W_sparse
         #
-        # data_reader = DataReader()
-        # data = DataObject(data_reader, 1, random_seed=random_seed)
-        # data.print()
+        # r2 = ItemKNNCBFRecommender(data.urm_train,data.icm_all_augmented)
+        # r2.fit(shrink=29, topK=5)
+        # s2 = r2.W_sparse
         #
+        # item_list_row = []
+        # item_list_col = []
+        # data_list = []
+        #
+        # all_cold_item = np.append(data.ids_cold_item, data.ids_cold_train_items)
+        #
+        # for cold_item in all_cold_item:
+        #     cols = s2[cold_item].indices
+        #     ds = s2[cold_item].data
+        #     for col, d in zip(cols, ds):
+        #         item_list_row.append(cold_item)
+        #         item_list_col.append(col)
+        #         data_list.append(d)
+        # new_s2 = sps.csr_matrix((data_list, (item_list_col, item_list_row)), shape=s1.shape)
+        #
+        # recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, s1, new_s2)
+        # recommender.fit(alpha=0.9)
+
+        recommender = UserKNNCFRecommender(data.urm_train)
+        recommender.fit(topK=2000, shrink=100, similarity="cosine", feature_weighting="BM25")
+        # data.remove_close_to_cold_item_interactions(1)
+
         # recommender = Hybrid003AlphaRecommender(data)
         # recommender.fit()
+        for n, users, description in data.urm_train_users_by_type:
+            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+            print(f"ALL 10,\t,\t {eval}")
+        users = data.ids_target_users
+        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        print(f"ALL 10,\t,\t {eval}")
+
+
+        # recommender = RP3betaRecommender(data.urm_train)
+        # recommender.fit(topK=10000, alpha=0.55, beta=0.05, implicit=True, normalize_similarity=True)
         # for n, users, description in data.urm_train_users_by_type:
         #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     print(f"ALL 10,\t,\t {eval}")
+        # users = data.ids_target_users
+        # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        # print(f"ALL 10,\t,\t {eval}")
+
+        # recommender = Hybrid101AlphaRecommender(data)
+        # recommender.fit()
+        # n, users, description = data.urm_train_users_by_type[1]
+        # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        # print(f"ALL 10,\t,\t {eval}")
+
+
+
+
+        # icm1 = data.icm_asset_augmented
+        # icm2 = data.icm_price_augmented
+        # icm3 = data.icm_class
+        #
+        # icm_all = sps.hstack((icm1, icm2, icm3))
+        #
+        # recommender = ItemKNNCBFRecommender(icm_all, data.urm_train)
+        # recommender.fit(topK=15)
+        # for n, users, description in data.urm_train_users_by_type:
+        #
+        #     cumulative_MAP = 0.0
+        #     userList_unique = users
+        #     URM_test = data.urm_test
+        #     num_eval = 1
+        #     size = 0
+        #     for user_id in userList_unique:
+        #         relevant_items = URM_test[user_id].indices
+        #         if len(relevant_items):
+        #             recommended_items = recommender.recommend(user_id, cutoff=10)
+        #             recommended_items = [x for x in recommended_items if x in data.ids_cold_train_items]
+        #             size += len(recommended_items)
+        #             if len(recommended_items):
+        #                 _m = MyEvaluator.MAP(recommended_items, relevant_items)
+        #                 cumulative_MAP += _m
+        #                 num_eval += 1
+        #     cumulative_MAP /= num_eval
+        #     print(f"{size/users.shape[0]}")
+        #
+        #     print(f"ALL 10,\t {description},\t {cumulative_MAP}")
         # users = data.ids_warm_user
         # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
         # print(f"ALL 10,\t,\t {eval}")
 
-        # recommender = ItemKNNCFRecommender(data.urm_train)
-        # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
-        #     for shrink in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-        #         for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
-        #             for feature_weighting in ["none", "BM25", "TF-IDF"]:
-        #                 recommender.fit(topK=topK,
-        #                                 shrink=shrink,
-        #                                 similarity=similarity,
-        #                                 feature_weighting=feature_weighting)
-        #                 LogToFileEvaluator.evaluate(data,
-        #                                             random_seed,
-        #                                             recommender,
-        #                                             "Item Collaborative",
-        #                                             f"topK={topK} - shrink={shrink} - similarity={similarity} - feature_weighting={feature_weighting}",
-        #                                             filename="item.csv")
+        # rec1 = RP3betaRecommender(data.urm_train)
+        # rec1.fit(topK=150, alpha=0.55, beta=0.05, normalize_similarity=True, implicit=True)
+        # rec2 = ItemKNNCFRecommender(data.urm_train)
+        # rec2.fit(topK=20000, shrink=5000, similarity="tanimoto")
 
+        # rec1 = UserKNNCFRecommender(data.urm_train)
+        # rec1.fit(topK=500, shrink=500, feature_weighting="TF-IDF")
+        # rec2 = ItemKNNCFRecommender(data.urm_train)
+        # rec2.fit(topK=5, shrink=29, similarity="jaccard")
+        # rec3 = RP3betaRecommender(data.urm_train)
+        # rec3.fit(topK=100, alpha=0.55, beta=0.01, implicit=True, normalize_similarity=True)
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec1, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec2, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec3, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     average_length = 0
+        #     for user in users:
+        #         items1 = rec1.recommend(user, cutoff=10)
+        #         items2 = rec2.recommend(user, cutoff=10)
+        #         items3 = rec3.recommend(user, cutoff=10)
+        #         if(len(items1) > 0 and len(items2) > 0 and len(items3) > 0):
+        #             all_items = [*items1, *items2, *items3]
+        #             length = np.unique(all_items).shape[0]
+        #             average_length += length
+        #     print(f"average_length : {average_length / n}")
+        # users = data.ids_warm_user
+        # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec1, at=10, remove_top=0)
+        # print(f"ALL 10,\t,\t {eval}")
+
+
+        # rec1 = UserKNNCFRecommender(data.urm_train)
+        # rec1.fit(topK=500, shrink=500, feature_weighting="TF-IDF")
+        # rec2 = ItemKNNCFRecommender(data.urm_train)
+        # rec2.fit(topK=5, shrink=29, similarity="jaccard")
+        # for n, users, description in data.urm_train_users_by_type:
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec1, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec2, at=10, remove_top=0)
+        #     print(f"ALL 10,\t {description},\t {eval}")
+        #     average_length = 0
+        #     for user in users:
+        #         items1 = rec1.recommend(user, cutoff=10)
+        #         items2 = rec2.recommend(user, cutoff=10)
+        #         # items3 = rec3.recommend(user, cutoff=10)
+        #         if(len(items1) > 0 and len(items2) > 0):
+        #             all_items = [*items1, *items2]
+        #             length = np.unique(all_items).shape[0]
+        #             average_length += length
+        #     print(f"average_length : {average_length / n}")
+
+        # recommender = IALSRecommender(data.urm_train)
+        # for epochs in [10, 50, 100, 500, 1000]:
+        #     for num_factors in [10, 50, 100, 500, 1000]:
+        #         for confidence_scaling in ["linear", "log"]:
+        #             for alpha in [0, 0.25, 0.5, 0.75, 1]:
+        #                 for epsilon in [0, 0.25, 0.5, 0.75, 1]:
+        #                     for reg in [0.1, 0.001, 0.00001]:
+        #                         for init_mean in [0, 0.5, 1]:
+        #                             for init_std in [0, 0.5, 1]:
+        #                                 recommender.fit(epochs=epochs,
+        #                                                 num_factors=num_factors,
+        #                                                 confidence_scaling=confidence_scaling,
+        #                                                 alpha=alpha,
+        #                                                 epsilon=epsilon,
+        #                                                 reg=reg,
+        #                                                 init_mean=init_mean,
+        #                                                 init_std=init_std)
+        #                                 LogToFileEvaluator.evaluate(data,
+        #                                                             random_seed,
+        #                                                             recommender,
+        #                                                             "Item Collaborative",
+        #                                                             f"epochs={epochs} - num_factors={num_factors} - confidence_scaling={confidence_scaling} - alpha={alpha} - epsilon={epsilon} - reg={reg} - init_mean={init_mean} - init_std={init_std}",
+        #                                                             filename="ials.csv")
 
         # recommender = SLIM_BPR_Cython(data.urm_train)
         # for lambda_i in [1, 0.1, 0.01, 0.001]:
@@ -174,32 +320,99 @@ if __name__ == '__main__':
         #                                                     f"sgd_mode={sgd_mode} - topK={topK} - epochs={epochs} - learning_rate={learning_rate} - lambda_i={lambda_i} - lambda_j={lambda_j}",
         #                                                     filename="slim_bpr.csv")
 
-        def eval_one_data(random_seed):
-            data_reader = DataReader()
-            data = DataObject(data_reader, 1, random_seed=random_seed)
-            data.print()
+        # recommender = RP3betaRecommender(data.urm_train)
+        # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
+        #     for alpha in range(0, 100, 5):
+        #         for beta in range(0, 100, 5):
+        #             alpha = alpha / 100
+        #             beta = beta / 100
+        #             for implicit in [True, False]:
+        #                 recommender.fit(topK=topK,
+        #                                 alpha=alpha,
+        #                                 beta=beta,
+        #                                 implicit=implicit)
+        #                 LogToFileEvaluator.evaluate(data,
+        #                                             random_seed,
+        #                                             recommender,
+        #                                             "Item Collaborative",
+        #                                             f"topK={topK} - alpha={alpha} - beta={beta} - implicit={implicit}",
+        #                                             filename="rp3.csv")
 
-            result = []
 
-            recommender = Hybrid003AlphaRecommender(data)
-            recommender.fit()
-            for n, users, description in data.urm_train_users_by_type:
-                eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-                print(f"ALL 10,\t {description},\t {eval}")
-                result.append(map)
-            users = data.ids_warm_user
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-            print(f"ALL 10,\t,\t {eval}")
-            result.append(map)
-            return result
 
-        for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
-            for shrink in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-                for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
-                    for feature_weighting in ["none", "BM25", "TF-IDF"]:
-                        args = {"topk": topK}
-                        partial_scores = Parallel(n_jobs=12)(
-                            delayed(eval_one_data)(generation) for generation in range(15, 15+12))
+        # n_dataset = 8
+        # def eval_one_data(random_seed):
+        #     data_reader = DataReader()
+        #     data = DataObject(data_reader, 1, random_seed=random_seed)
+        #     data.print()
+        #
+        #     result = []
+        #
+        #     recommender = ItemKNNCFRecommender(data.urm_train)
+        #     recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
+        #     for n, users, description in data.urm_train_users_by_type:
+        #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        #         result.append(map)
+        #     users = data.ids_warm_user
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        #     result.append(map)
+        #     return result
+        # for topK in range(10000, 25000, 500):
+        #     for shrink in range(10000, 25000, 500):
+        #         for similarity in ["cosine"]:
+        #             for feature_weighting in ["TF-IDF"]:
+        #                 args = {"topK": topK, "shrink": shrink, "similarity": similarity,
+        #                         "feature_weighting": feature_weighting}
+        #                 partial_scores = Parallel(n_jobs=n_dataset)(
+        #                     delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
+        #                 mean_score = np.zeros(shape=len(partial_scores[0]))
+        #                 for s in partial_scores:
+        #                     mean_score += s
+        #                 mean_score = mean_score / n_dataset
+        #                 f = open("eval_2.csv", "a+")
+        #                 f.write(" ".join([str(x) + "," for x in mean_score]))
+        #                 values = " ".join([str(x) + "," for x in mean_score])
+        #                 f.write(f"{args}, {values}\n")
+        #                 f.flush()
+
+
+
+        # n_dataset = 8
+        # def eval_one_data(random_seed):
+        #     data_reader = DataReader()
+        #     data = DataObject(data_reader, 1, random_seed=random_seed)
+        #     data.print()
+        #
+        #     result = []
+        #
+        #     recommender = ItemKNNCFRecommender(data.urm_train)
+        #     recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
+        #     for n, users, description in data.urm_train_users_by_type:
+        #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        #         result.append(map)
+        #     users = data.ids_warm_user
+        #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        #     result.append(map)
+        #     return result
+        #
+        #
+        # for topK in range(10000, 25000, 500):
+        #     for shrink in range(10000, 25000, 500):
+        #         for similarity in ["cosine"]:
+        #             for feature_weighting in ["TF-IDF"]:
+        #                 args = {"topK": topK, "shrink": shrink, "similarity": similarity,
+        #                         "feature_weighting": feature_weighting}
+        #                 partial_scores = Parallel(n_jobs=n_dataset)(
+        #                     delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
+        #                 mean_score = np.zeros(shape=len(partial_scores[0]))
+        #                 for s in partial_scores:
+        #                     mean_score += s
+        #                 mean_score = mean_score / n_dataset
+        #                 f = open("eval_2.csv", "a+")
+        #                 f.write(" ".join([str(x) + "," for x in mean_score]))
+        #                 values = " ".join([str(x) + "," for x in mean_score])
+        #                 f.write(f"{args}, {values}\n")
+        #                 f.flush()
 
         # recommender = ItemKNNCFRecommender(data.urm_train)
         # recommender.fit(topK=12, shrink=15, feature_weighting="none", similarity="jaccard")
@@ -208,18 +421,24 @@ if __name__ == '__main__':
         # print(f"ALL 10,\t {description},\t {eval}")
 
         # ws = []
-        # m_cutoff = 30
-        # anti_overfitting_generation = 4
+        # m_cutoff = 20
+        # anti_overfitting_generation = 2
         # for i in range(anti_overfitting_generation):
         #     data_reader = DataReader()
-        #     data = DataObject(data_reader, 1, random_seed=(15+i))
-        #     rec1 = TopPop(data.urm_train)
-        #     rec1.fit()
-        #     rec2 = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
-        #     rec2.fit(topK=11000, shrink=1)
+        #     data = DataObject(data_reader, 1, random_seed=(20+i))
+        #     rec1 = SLIM_BPR_Cython(data.urm_train)
+        #     rec1.fit(sgd_mode="adagrad", topK=50, epochs=250, learning_rate=1e-05, lambda_i=1, lambda_j=1)
+        #     rec2 = ItemKNNCFRecommender(data.urm_train)
+        #     rec2.fit(topK=5, shrink=29, similarity="tanimoto")
+        #     rec3 = RP3betaRecommender(data.urm_train)
+        #     rec3.fit(topK=100, alpha=0.55, beta=0.01, implicit=True, normalize_similarity=True)
         #     # rec1 = ItemKNNCFRecommender(data.urm_train)
         #     # rec1.fit(topK=30, shrink=30, similarity="jaccard")
-        #     base_recommenders = [rec1, rec2]
+        #     # rec1 = ItemKNNCFRecommender(data.urm_train)
+        #     # rec1.fit(topK=20000, shrink=20000,feature_weighting="TF-IDF")
+        #     # rec2 = ItemKNNCBFOnlyColdRecommender(data)
+        #     # rec2.fit(topK=20)
+        #     base_recommenders = [rec1, rec2, rec3]
         #     # t_users = data.ids_user
         #     n, t_users, description = data.urm_train_users_by_type[0]
         #     tested_users = t_users
@@ -232,7 +451,11 @@ if __name__ == '__main__':
         #
         # rec = Hybrid1XXAlphaRecommender(data, base_recommenders, max_cutoff=m_cutoff)
         # rec.fit(weights=mean_ws)
+        # # for n, users, description in data.urm_train_users_by_type:
+        # #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec, at=10, remove_top=0)
+        # #     print(f"ALL 10,\t {description},\t {eval}")
         # n, t_users, description = data.urm_train_users_by_type[0]
+        # # t_users = data.ids_target_users
         # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, t_users, rec, at=10, remove_top=0)
         # print(f"ALL 10,\t {description},\t {eval}")
         #
@@ -242,13 +465,13 @@ if __name__ == '__main__':
         # f.write("Hybrid000, 0 -> TopPop, 1 -> UserCBF\n")
         # f.write(f"{mean_ws[0]}\n")
         # f.write(f"{mean_ws[1]}\n")
+        # f.flush()
         # for n, users, description in data.urm_train_users_by_type:
         #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec, at=10, remove_top=0)
         #     print(f"ALL 10,\t {description},\t {eval}")
         # users = data.ids_warm_user
         # eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec, at=10, remove_top=0)
         # print(f"ALL 10,\t,\t {eval}")
-
 
         # IALSRecommender
         # recommender = ItemKNNCFRecommender(data.urm_train)

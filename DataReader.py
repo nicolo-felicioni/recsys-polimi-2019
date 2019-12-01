@@ -62,7 +62,7 @@ class DataReader(object):
 
         item_id_list = df_original['item'].values
         feature_id_list = df_original['feature'].values
-        data_id_list = df_original['data'].values
+        data_id_list = df_original['data'].values * 2
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
 
@@ -80,10 +80,98 @@ class DataReader(object):
         df_original.columns = ['item', 'feature', 'data']
 
         item_id_list = df_original['item'].values
-        feature_id_list = df_original['feature'].values
-        data_id_list = df_original['data'].values
+        feature_id_list = [x+1 for x in df_original['feature'].values]
+        data_id_list = df_original['data'].values * 2
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
+
+        # print("DataReader:")
+        # print("\tLoading the price ICM: " + icm_asset_path)
+        # print("\t\tPrice ICM size:" + str(csr_matrix.shape))
+        # print("\tPrice ICM loaded.")
+
+        return csr_matrix
+
+    def load_icm_asset_augmented(self):
+        df_original = pd.read_csv(filepath_or_buffer=icm_asset_path, sep=',', header=1,
+                                  dtype={'item': int, 'feature': int, 'data': float})
+
+        df_original.columns = ['item', 'feature', 'data']
+
+        item_id_list = df_original['item'].values
+        feature_id_list = [x+1 for x in df_original['feature'].values]
+        data_id_list = df_original['data'].values
+
+        all_list = zip(item_id_list, feature_id_list, data_id_list)
+        sorted_list = sorted(all_list, key=lambda v: v[2])
+        n_cluster = 5
+        off_set = 0
+        size = len(sorted_list)
+
+        new_item_id_list = []
+        new_feature_id_list = []
+        new_data_id_list = []
+
+        for i in range(0,n_cluster):
+            min = int(i * size/n_cluster)
+            max = int((i+1) * size/n_cluster)
+            for item, feature_id_list, data in sorted_list[min:max]:
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i) + off_set)
+                new_data_id_list.append(0.5)
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i+1) + off_set)
+                new_data_id_list.append(1)
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i+2) + off_set)
+                new_data_id_list.append(0.5)
+
+
+        csr_matrix = sps.csr_matrix((new_data_id_list, (new_item_id_list, new_feature_id_list)))
+
+        # print("DataReader:")
+        # print("\tLoading the price ICM: " + icm_asset_path)
+        # print("\t\tPrice ICM size:" + str(csr_matrix.shape))
+        # print("\tPrice ICM loaded.")
+
+        return csr_matrix
+
+    def load_icm_price_augmented(self):
+        df_original = pd.read_csv(filepath_or_buffer=icm_price_path, sep=',', header=1,
+                                  dtype={'item': int, 'feature': int, 'data': float})
+
+        df_original.columns = ['item', 'feature', 'data']
+
+        item_id_list = df_original['item'].values
+        feature_id_list = [x+1 for x in df_original['feature'].values]
+        data_id_list = df_original['data'].values
+
+        all_list = zip(item_id_list, feature_id_list, data_id_list)
+        sorted_list = sorted(all_list, key=lambda v: v[2])
+        n_cluster = 5
+        off_set = 8
+        size = len(sorted_list)
+
+        new_item_id_list = []
+        new_feature_id_list = []
+        new_data_id_list = []
+
+        for i in range(0,n_cluster):
+            min = int(i * size/n_cluster)
+            max = int((i+1) * size/n_cluster)
+            for item, feature_id_list, data in sorted_list[min:max]:
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i) + off_set)
+                new_data_id_list.append(0.5)
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i+1) + off_set)
+                new_data_id_list.append(1)
+                new_item_id_list.append(int(item))
+                new_feature_id_list.append(int(i+2) + off_set)
+                new_data_id_list.append(0.5)
+
+
+        csr_matrix = sps.csr_matrix((new_data_id_list, (new_item_id_list, new_feature_id_list)))
 
         # print("DataReader:")
         # print("\tLoading the price ICM: " + icm_asset_path)
@@ -99,7 +187,7 @@ class DataReader(object):
         df_original.columns = ['item', 'feature', 'data']
 
         item_id_list = df_original['item'].values
-        feature_id_list = df_original['feature'].values
+        feature_id_list = np.array([x+2 for x in df_original['feature'].values])
         data_id_list = df_original['data'].values
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)))
@@ -137,7 +225,7 @@ class DataReader(object):
         df_original.columns = ['item', 'feature', 'data']
 
         item_id_list = df_original['item'].values
-        feature_id_list = [x+8 for x in df_original['feature'].values]
+        feature_id_list = [x+16 for x in df_original['feature'].values]
         data_id_list = df_original['data'].values
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)), shape=[n, max(feature_id_list)+1])
