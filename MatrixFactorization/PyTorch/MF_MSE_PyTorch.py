@@ -32,7 +32,7 @@ class MF_MSE_PyTorch(BaseRecommender, Incremental_Training_Early_Stopping):
     def __init__(self, URM_train, positive_threshold=4):
 
 
-        super(MF_MSE_PyTorch, self).__init__()
+        super(MF_MSE_PyTorch,  self).__init__(URM_train)
 
 
         self.URM_train = URM_train
