@@ -55,7 +55,7 @@ class DataReader(object):
         return user_id_unique
 
     def load_icm_asset(self):
-        df_original = pd.read_csv(filepath_or_buffer=icm_asset_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=icm_asset_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -74,7 +74,7 @@ class DataReader(object):
         return csr_matrix
 
     def load_icm_price(self):
-        df_original = pd.read_csv(filepath_or_buffer=icm_price_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=icm_price_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -93,7 +93,7 @@ class DataReader(object):
         return csr_matrix
 
     def load_icm_asset_augmented(self):
-        df_original = pd.read_csv(filepath_or_buffer=icm_asset_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=icm_asset_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -137,7 +137,7 @@ class DataReader(object):
         return csr_matrix
 
     def load_icm_price_augmented(self):
-        df_original = pd.read_csv(filepath_or_buffer=icm_price_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=icm_price_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -181,7 +181,7 @@ class DataReader(object):
         return csr_matrix
 
     def load_icm_class(self):
-        df_original = pd.read_csv(filepath_or_buffer=icm_class_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=icm_class_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -200,7 +200,7 @@ class DataReader(object):
         return csr_matrix
 
     def load_ucm_region(self, n):
-        df_original = pd.read_csv(filepath_or_buffer=ucm_region_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=ucm_region_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
@@ -219,13 +219,13 @@ class DataReader(object):
         return csr_matrix
 
     def load_ucm_age(self, n):
-        df_original = pd.read_csv(filepath_or_buffer=ucm_age_path, sep=',', header=1,
+        df_original = pd.read_csv(filepath_or_buffer=ucm_age_path, sep=',', header=0,
                                   dtype={'item': int, 'feature': int, 'data': float})
 
         df_original.columns = ['item', 'feature', 'data']
 
         item_id_list = df_original['item'].values
-        feature_id_list = [x+16 for x in df_original['feature'].values]
+        feature_id_list = [x for x in df_original['feature'].values]
         data_id_list = df_original['data'].values
 
         csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)), shape=[n, max(feature_id_list)+1])

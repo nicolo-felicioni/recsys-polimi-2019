@@ -85,7 +85,7 @@ if __name__ == '__main__':
     MyEvaluator.evaluate_algorithm(data.test_urm, data.warm_user_ids, recommender)
 
     # recommender.fit(epochs=1100)
-    # f = open("submission.csv", "w+")
+    # f = open("submission_old.csv", "w+")
     # f.write("user_id,item_list\n")
     # for user_id in data.target_users:
     #     if len(data.train_urm[user_id].indices) > 1:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     #
     #
     # logFile = open(output_root_path + "result_all_algorithms.txt", "a")
-    # f = open("submission.csv", "w+")
+    # f = open("submission_old.csv", "w+")
     #
     # for recommender_class in recommender_list:
     #

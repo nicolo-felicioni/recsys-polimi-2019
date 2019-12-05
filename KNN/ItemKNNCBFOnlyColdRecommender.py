@@ -19,8 +19,8 @@ class ItemKNNCBFOnlyColdRecommender(BaseSimilarityMatrixRecommender):
 
     def __init__(self, data):
         super(ItemKNNCBFOnlyColdRecommender, self).__init__(data.urm_train)
-        self.rec = ItemKNNCBFRecommender(data.icm_all_augmented, data.urm_train)
-        self.cold_item = data.ids_cold_item
+        self.rec = ItemKNNCBFRecommender(data.urm_train, data.icm_all_augmented)
+        self.cold_item = np.concatenate((data.ids_cold_train_items, data.ids_cold_item))
         self.data = data
 
     def _compute_item_score_postprocess_for_cold_items(self, item_scores):

@@ -12,17 +12,6 @@ import numpy as np
 import operator
 
 
-def fib(n):
-    if n == 0:
-        return [0]
-    elif n == 1:
-        return [0, 1]
-    else:
-        lst = fib(n - 1)
-        lst.append(lst[-1] + lst[-2])
-        return lst
-
-
 class Hybrid109AlphaRecommender(BaseRecommender):
     """Hybrid109AlphaRecommender recommender"""
 
@@ -89,7 +78,7 @@ class Hybrid109AlphaRecommender(BaseRecommender):
         #             0.02629003636815483, 0.0032641864791993955, 0.00038332327739396026]]
 
 
-        # In locale e' peggio del primo, e' pure nel test pubblico remoto
+        # In locale e' peggio del primo, e pure nel test pubblico remoto
         # E' stato trainato con PotentissimoV2 per tante epoche
         # weights = [[0.01233108125327007, 0.009842101430047169, 0.007733038966152204, 0.004295790160139485,
         #             0.004924029986872728, 0.008746715378001195, 0.004163959425021065, 0.006975920311230475,
