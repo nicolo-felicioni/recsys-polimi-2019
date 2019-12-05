@@ -60,12 +60,12 @@ if __name__ == '__main__':
     data_reader = DataReader()
     data = DataObject(data_reader, 1, random_seed=random_seed)
     data.print()
-    
-    recommender = UserKNNCFRecommender(data.urm_train)
+
     for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
         for shrink in [10, 100, 1000, 10000]:
             for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
                 for feature_weighting in ["none", "BM25", "TF-IDF"]:
+                    recommender = UserKNNCFRecommender(data.urm_train)
                     recommender.fit(topK=topK,
                                     shrink=shrink,
                                     similarity=similarity,
@@ -77,11 +77,27 @@ if __name__ == '__main__':
                                                 f"topK={topK} - shrink={shrink} - similarity={similarity} - feature_weighting={feature_weighting}",
                                                 filename="userCF.csv")
 
-    # recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
+    # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
+    #     for shrink in [10, 100, 1000, 10000]:
+    #         for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
+    #             for feature_weighting in ["none", "BM25", "TF-IDF"]:
+    #                 recommender = ItemKNNCFRecommender(data.urm_train)
+    #                 recommender.fit(topK=topK,
+    #                                 shrink=shrink,
+    #                                 similarity=similarity,
+    #                                 feature_weighting=feature_weighting)
+    #                 LogToFileEvaluator.evaluate(data,
+    #                                             random_seed,
+    #                                             recommender,
+    #                                             "Item CF",
+    #                                             f"topK={topK} - shrink={shrink} - similarity={similarity} - feature_weighting={feature_weighting}",
+    #                                             filename="itemCF.csv")
+
     # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
     #     for shrink in [1, 2, 5]:
     #         for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
     #             for feature_weighting in ["none", "BM25", "TF-IDF"]:
+    #                 recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
     #                 recommender.fit(topK=topK,
     #                                 shrink=shrink,
     #                                 similarity=similarity,
@@ -93,11 +109,11 @@ if __name__ == '__main__':
     #                                             f"topK={topK} - shrink={shrink} - similarity={similarity} - feature_weighting={feature_weighting}",
     #                                             filename="userCBF.csv")
 
-    # recommender = ItemKNNCBFRecommender(data.urm_train, data.icm_all_augmented)
     # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
     #     for shrink in [1, 2, 5]:
     #         for similarity in ["tanimoto", "cosine", "euclidean", "jaccard"]:
     #             for feature_weighting in ["none", "BM25", "TF-IDF"]:
+    #                 recommender = ItemKNNCBFRecommender(data.urm_train, data.icm_all_augmented)
     #                 recommender.fit(topK=topK,
     #                                 shrink=shrink,
     #                                 similarity=similarity,
@@ -129,13 +145,13 @@ if __name__ == '__main__':
     #                                                     f"sgd_mode={sgd_mode} - topK={topK} - epochs={epochs} - learning_rate={learning_rate} - lambda_i={lambda_i} - lambda_j={lambda_j}",
     #                                                     filename="slim_bpr.csv")
 
-    # recommender = RP3betaRecommender(data.urm_train)
     # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
     #     for alpha in range(0, 100, 5):
     #         alpha = alpha / 100
     #         for beta in range(0, 100, 5):
     #             beta = beta / 100
     #             for implicit in [True]:
+    #                 recommender = RP3betaRecommender(data.urm_train)
     #                 recommender.fit(topK=topK,
     #                                 alpha=alpha,
     #                                 beta=beta,
