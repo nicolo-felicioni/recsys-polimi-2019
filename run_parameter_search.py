@@ -7,6 +7,8 @@ Created on 22/11/17
 """
 
 from Base.NonPersonalizedRecommender import TopPop, Random
+from DataObject import DataObject
+from DataReader import DataReader
 from KNN.UserKNNCFRecommender import UserKNNCFRecommender
 from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
@@ -23,7 +25,7 @@ from functools import partial
 
 
 
-from data.Movielens_10M.Movielens10MReader import Movielens10MReader
+# from data.Movielens_10M.Movielens10MReader import Movielens10MReader
 from ParameterTuning.run_parameter_search import runParameterSearch_Collaborative
 
 
@@ -41,13 +43,16 @@ def read_data_split_and_search():
 
 
 
-    dataReader = Movielens10MReader()
+    #dataReader = Movielens10MReader()
+    data_reader = DataReader()
 
-    URM_train = dataReader.get_URM_train()
-    URM_validation = dataReader.get_URM_validation()
-    URM_test = dataReader.get_URM_test()
 
-    output_folder_path = "result_experiments/"
+    # URM_train = dataReader.get_URM_train()
+    # URM_validation = dataReader.get_URM_validation()
+    # URM_test = dataReader.get_URM_test()
+    data = DataObject(data_reader, k=1, random_seed=13)
+
+    output_folder_path = "result_experiments_parameter_search/"
 
 
     # If directory does not exist, create
@@ -61,17 +66,17 @@ def read_data_split_and_search():
 
 
     collaborative_algorithm_list = [
-        Random,
-        TopPop,
+        #Random,
+        #TopPop,
         P3alphaRecommender,
         RP3betaRecommender,
-        ItemKNNCFRecommender,
-        UserKNNCFRecommender,
+        #ItemKNNCFRecommender,
+        #UserKNNCFRecommender,
         MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
-        SLIM_BPR_Cython,
-        SLIMElasticNetRecommender
+        #MatrixFactorization_FunkSVD_Cython,
+        #PureSVDRecommender,
+        #SLIM_BPR_Cython,
+        #SLIMElasticNetRecommender
     ]
 
 
@@ -79,19 +84,19 @@ def read_data_split_and_search():
 
     from Base.Evaluation.Evaluator import EvaluatorHoldout
 
-    evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=[5])
-    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list=[5, 10])
+    evaluator_validation = EvaluatorHoldout(data.urm_test, cutoff_list=[10])
+    evaluator_test = EvaluatorHoldout(data.urm_train, cutoff_list=[10])
 
 
     runParameterSearch_Collaborative_partial = partial(runParameterSearch_Collaborative,
-                                                       URM_train = URM_train,
+                                                       URM_train = data.urm_train,
                                                        metric_to_optimize = "MAP",
                                                        n_cases = 10,
                                                        evaluator_validation_earlystopping = evaluator_validation,
                                                        evaluator_validation = evaluator_validation,
                                                        evaluator_test = evaluator_test,
                                                        output_folder_path = output_folder_path,
-                                                       similarity_type_list = ["cosine"],
+                                                       #similarity_type_list = ["cosine"],
                                                        parallelizeKNN = False)
 
 

@@ -9,7 +9,7 @@ icm_class_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019
 ucm_region_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_region.csv"
 ucm_age_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv"
 target_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/alg_sample_submission.csv"
-
+ucm_interaction_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_interaction.csv"
 
 class DataReader(object):
 
@@ -205,6 +205,24 @@ class DataReader(object):
 
         df_original.columns = ['item', 'feature', 'data']
 
+        item_id_list = df_original['item'].values
+        feature_id_list = df_original['feature'].values
+        data_id_list = df_original['data'].values
+
+        csr_matrix = sps.csr_matrix((data_id_list, (item_id_list, feature_id_list)), shape=[n, max(feature_id_list)+1])
+
+        # print("DataReader:")
+        # print("\tLoading the region UCM: " + icm_asset_path)
+        # print("\t\tRegion UCM size:" + str(csr_matrix.shape))
+        # print("\tRegion UCM loaded.")
+
+        return csr_matrix
+
+
+    def load_ucm_interaction(self, n):
+        df_original = pd.read_csv(filepath_or_buffer=ucm_interaction_path, sep=',', header=1,
+                                  dtype={'item': int, 'feature': int, 'data': float})
+        df_original.columns = ['item', 'feature', 'data']
         item_id_list = df_original['item'].values
         feature_id_list = df_original['feature'].values
         data_id_list = df_original['data'].values

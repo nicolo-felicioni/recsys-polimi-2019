@@ -1,7 +1,8 @@
 from Base.BaseRecommender import BaseRecommender
 from DataObject import DataObject
-from Data_manager.DataReader import DataReader
+from DataReader import DataReader
 from GraphBased.P3alphaRecommender import P3alphaRecommender
+from GraphBased.RP3betaRecommender import RP3betaRecommender
 from Hybrid.Hybrid100AlphaRecommender import Hybrid100AlphaRecommender
 from Hybrid.Hybrid101AlphaRecommender import Hybrid101AlphaRecommender
 from Hybrid.Hybrid102AlphaRecommender import Hybrid102AlphaRecommender
@@ -25,7 +26,8 @@ class Hybrid003AlphaRecommender(BaseRecommender):
         self.poco_warm_recommender = Hybrid101AlphaRecommender(data)
         self.quasi_warm_recommender = Hybrid102AlphaRecommender(data)
         # self.warm_recommender = ItemKNNCFRecommender(data.urm_train)
-        self.warm_recommender = Hybrid105AlphaRecommender(data)
+        # self.warm_recommender = Hybrid105AlphaRecommender(data)
+        self.warm_recommender = RP3betaRecommender(data.urm_train)
         self.warm_7_recommender = ItemKNNCFRecommender(data.urm_train)
         self.warm_8_recommender = Hybrid108AlphaRecommender(data)
         self.warm_9_recommender = Hybrid109AlphaRecommender(data)
@@ -36,7 +38,7 @@ class Hybrid003AlphaRecommender(BaseRecommender):
         self.poco_warm_recommender.fit()
         self.quasi_warm_recommender.fit()
         # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
-        self.warm_recommender.fit()
+        self.warm_recommender.fit(topK=20, alpha=0.16, beta=0.24)
         self.warm_7_recommender.fit(topK=12, shrink=15, feature_weighting="none", similarity="jaccard")
         self.warm_8_recommender.fit()
         self.warm_9_recommender.fit()

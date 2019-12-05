@@ -33,6 +33,7 @@ class DataObject(object):
         self.icm_all_augmented = sps.hstack([self.icm_asset_augmented, self.icm_price_augmented, self.icm_class]).tocsr()
         self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
+        self.ucm_interaction = data_reader.load_ucm_interaction(self.number_of_users)
         self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age]).tocsr()
         splitter = Splitter(self.urm)
         splitter.split_train_test_check_if_stored(k=k, probability=0, random_seed=random_seed)

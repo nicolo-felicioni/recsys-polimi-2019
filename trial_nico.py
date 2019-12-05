@@ -37,10 +37,11 @@ def make_submission():
 
     print("making the submission")
     data_reader_loc = DataReader()
-    data_loc = DataObject(data_reader_loc, k=0)
+    data_loc = DataObject(data_reader_loc, k=0, random_seed=999)
+    data_loc.urm_train = data_loc.urm
     recommender = Hybrid003AlphaRecommender(data_loc)
     recommender.fit()
-    f = open("submissionHybrid003_k_12_shrink_15.csv", "w+")
+    f = open("submissionHybrid003_tanimoto.csv", "w+")
     f.write("user_id,item_list\n")
     for user_id in data_loc.ids_target_users:
         recommended_items = recommender.recommend(user_id, cutoff=10)
@@ -103,6 +104,7 @@ def slim_tuning(f, epochs=300,
         print(d + "\t\t" + "average map: " + str(map_dict[d]))
 
 
+
     f.write("\nepochs={}, train_with_sparse_weights = {},symmetric = {}, batch_size = {},".format(epochs,
                                                                                               train_with_sparse_weights,
                                                                                               symmetric, batch_size))
@@ -120,7 +122,7 @@ def slim_tuning(f, epochs=300,
 
 if __name__ == '__main__':
 
-    # df_user_age = pd.read_csv("Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv")
+    df_user_age = pd.read_csv("Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv")
 
 
     want_submission = False
@@ -132,14 +134,13 @@ if __name__ == '__main__':
         #     slim_tuning(epochs=e) # we fix epoch = 150
         want_slim_tuning = False
         if want_slim_tuning:
-
             start_time = time.time()
-
-            # lambda_j_list = [0.01, 0.05, 0.1, 0.2]
-            # lambda_i_list = [0]
-            f = open("slim_high_reg_more_epochs.txt", "w+")
+            f = open("slim_high_reg_learning_rate.txt", "w+")
             f.write("final review\n\n")
-            slim_tuning(f, epochs=200, lambda_i=0.7, lambda_j=1, sgd_mode='adagrad')  # we fix epoch = 150
+            lr_list = [0.0005, 0.001, 0.005]
+            # lambda_i_list = [0]
+            for l in lr_list:
+                slim_tuning(f, epochs=200, lambda_i=2, lambda_j=2, sgd_mode='adagrad', learning_rate=l)
 
             print("Completed in {:.2f} minutes".format(float(time.time() - start_time)/60))
 
@@ -155,10 +156,13 @@ if __name__ == '__main__':
             #     sgd_mode='adagrad', gamma=0.995, beta_1=0.9, beta_2=0.999)
         else:
             data_reader = DataReader()
-            data = DataObject(data_reader, k=1)
-            rec = SLIM_BPR_Cython(data.urm_train)
-            rec.fit(epochs=200, lambda_i=0.7, lambda_j=1, sgd_mode='adagrad')
-            print(MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_user, rec))
+            data = DataObject(data_reader, k=1, random_seed=2)
+            rec = Hybrid003AlphaRecommender(data)
+            rec.fit()
+            for n, users, description in data.urm_train_users_by_type:
+                eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, rec, at=10, remove_top=0)
+                print(f"\t {description},\t {eval}")
+            print(MyEvaluator.evaluate_algorithm(data.urm_test, data.ids_warm_user, rec))
 
         # rec1 = Hybrid003AlphaRecommender(data)
         # rec1.fit()
