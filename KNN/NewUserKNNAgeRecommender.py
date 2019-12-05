@@ -27,13 +27,15 @@ class NewUserKNNAgeRecommender(BaseSimilarityMatrixRecommender):
         It uses the age information given by the dataset.
     """
 
+    ucm_age_path = "Data_manager_split_datasets/RecSys2019/recommender-system-2019-challenge-polimi/data_UCM_age.csv"
+
     RECOMMENDER_NAME = "UserKNNAgeRecommender"
 
-    def __init__(self, data: DataObject, df_age: pd.DataFrame):
+    def __init__(self, data: DataObject):
         seed(1)
         super(NewUserKNNAgeRecommender, self).__init__(data.urm_train)
-        self.df_age = df_age.copy()
-        self.data = data
+        self.df_age = pd.read_csv(self.ucm_age_path)
+        self.n_of_users = data.number_of_users
         self._compute_item_score = self._compute_score_user_based
 
     def _compute_item_score_postprocess_for_cold_users(self, user_id_array, item_scores):
@@ -87,7 +89,7 @@ class NewUserKNNAgeRecommender(BaseSimilarityMatrixRecommender):
                 data += [list_similarity[i]] * length
                 row_indices += [u_id] * length
 
-        n = self.data.number_of_users
+        n = self.n_of_users
 
         W_sparse = sps.csr_matrix((data, (row_indices, col_indices)), shape=(n, n))
         print(W_sparse)
