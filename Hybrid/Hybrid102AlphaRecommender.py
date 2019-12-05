@@ -55,7 +55,7 @@ class Hybrid102AlphaRecommender(BaseRecommender):
 
     def fit(self, coeff=1.4, weights=None):
         # self.rec1.fit(shrink=20000, topK=20000, feature_weighting="TF-IDF")
-        self.rec1.fit(shrink=15, topK=12, feature_weighting="none")
+        self.rec1.fit(shrink=5000, topK=5000, feature_weighting="TF-IDF")
         self.rec2.fit(topK=170, implicit=True, alpha=0.5)
         # self.rec2.fit(epochs=1100, lambda_i=0.001, lambda_j=0.001)
         # self.weights = [

@@ -30,7 +30,8 @@ class DataObject(object):
         self.icm_price_augmented = data_reader.load_icm_price_augmented()
         self.icm_class = data_reader.load_icm_class()
         self.icm_all = sps.hstack([self.icm_asset, self.icm_price, self.icm_class]).tocsr()
-        self.icm_all_augmented = sps.hstack([self.icm_asset_augmented, self.icm_price_augmented, self.icm_class]).tocsr()
+        self.icm_all_augmented = sps.hstack(
+            [self.icm_asset_augmented, self.icm_price_augmented, self.icm_class]).tocsr()
         self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
         self.ucm_interaction = data_reader.load_ucm_interaction(self.number_of_users)
@@ -82,9 +83,15 @@ class DataObject(object):
                                            (self.get_number_of_users_with_from_X_to_Y_interactions(21, 31),
                                             self.get_ids_of_users_with_from_X_to_Y_interactions(21, 31),
                                             "users with [21 - 31] interactions"),
-                                           (self.get_number_of_users_with_more_than_X_interactions(31),
-                                            self.get_ids_of_users_with_more_than_X_interactions(31),
-                                           "users with [31 -  ) interactions")])
+                                           (self.get_number_of_users_with_from_X_to_Y_interactions(32, 41),
+                                            self.get_ids_of_users_with_from_X_to_Y_interactions(32, 42),
+                                            "train users with [32 -  40] interactions"),
+                                           (self.get_number_of_users_with_from_X_to_Y_interactions(42, 68),
+                                            self.get_ids_of_users_with_from_X_to_Y_interactions(42, 68),
+                                            "train users with [42 -  68] interactions"),
+                                           (self.get_number_of_users_with_more_than_X_interactions(68),
+                                            self.get_ids_of_users_with_more_than_X_interactions(68),
+                                            "train users with [69 - ) interactions")])
         self.urm_train_users_by_type = np.array([(self.get_number_of_train_users_with_from_X_to_Y_interactions(0, 0),
                                                   self.get_ids_of_train_users_with_from_X_to_Y_interactions(0, 0),
                                                   "train users with [0 - 0] interactions"),
@@ -112,9 +119,24 @@ class DataObject(object):
                                                  (self.get_number_of_train_users_with_from_X_to_Y_interactions(21, 31),
                                                   self.get_ids_of_train_users_with_from_X_to_Y_interactions(21, 31),
                                                   "train users with [21 -  31] interactions"),
-                                                 (self.get_number_of_train_users_with_from_X_to_Y_interactions(31),
-                                                  self.get_ids_of_train_users_with_more_than_X_interactions(31),
-                                                 "train users with [31 - ) interactions")])
+                                                 (self.get_number_of_train_users_with_from_X_to_Y_interactions(32, 41),
+                                                  self.get_ids_of_train_users_with_from_X_to_Y_interactions(32, 41),
+                                                  "train users with [32 -  40] interactions"),
+                                                 (self.get_number_of_train_users_with_from_X_to_Y_interactions(42, 68),
+                                                  self.get_ids_of_train_users_with_from_X_to_Y_interactions(42, 68),
+                                                  "train users with [42 -  68] interactions"),
+                                                 (self.get_number_of_train_users_with_more_than_X_interactions(68),
+                                                  self.get_ids_of_train_users_with_more_than_X_interactions(68),
+                                                  "train users with [69 - ) interactions")])
+        # ADD USER BY TYPE
+        # IT IS COMMENTED BECAUSE I THINK IT IS NOT USEFUL
+        # self.urm_train_users_by_feature_type = self.init_train_user_by_feature_type()
+        # self.train_users_type = []
+        # for type in self.urm_train_users_by_type:
+        #     self.train_users_type.append(type)
+        # for type in self.urm_train_users_by_feature_type:
+        #     self.train_users_type.append(type)
+        # self.train_users_type.append((self.number_of_target_users, self.ids_target_users, "target users"))
         self.ids_ultra_cold_users = np.array([x for x in self.ids_cold_user if self.ucm_all[x].indices.shape[0] == 0])
         self.number_of_ultra_cold_users = self.ids_ultra_cold_users.shape[0]
 
@@ -239,6 +261,21 @@ class DataObject(object):
         x2 = np.where(a <= y)
         return np.array([x for x in x1[0] if x in x2[0] and x not in self.ids_cold_user])
 
+    def init_train_user_by_feature_type(self):
+        csc_ucm = self.ucm_all.tocsc()
+        result = []
+        for i in range(0, 8):
+            users = csc_ucm.getcol(i).indices
+            if users.shape[0] > 0:
+                users = np.array([x for x in users if x in self.ids_warm_train_users])
+                result.append((users.shape[0], users, f"train warm users with region {i}"))
+        for i in range(8, 19):
+            users = csc_ucm.getcol(i).indices
+            if users.shape[0] > 0:
+                users = np.array([x for x in users if x in self.ids_warm_train_users])
+                result.append((users.shape[0], users, f"train warm users with age {i - 8}"))
+        return result
+
     def remove_close_to_cold_item_interactions(self, min_interactions=1):
         urm = self.urm.tocsc()
         a = self.number_of_interactions_per_item
@@ -254,8 +291,8 @@ class DataObject(object):
                 user_list.append(user_id)
                 data_list.append(1)
 
-        self.urm = sps.csr_matrix((data_list, (user_list, item_list)), shape=(self.number_of_users, self.number_of_items))
-
+        self.urm = sps.csr_matrix((data_list, (user_list, item_list)),
+                                  shape=(self.number_of_users, self.number_of_items))
 
         urm_train = self.urm_train.tocsc()
         a = self.number_of_interactions_per_train_item
@@ -271,4 +308,5 @@ class DataObject(object):
                 user_list.append(user_id)
                 data_list.append(1)
 
-        self.urm_train = sps.csr_matrix((data_list, (user_list, item_list)), shape=(self.number_of_users, self.number_of_items))
+        self.urm_train = sps.csr_matrix((data_list, (user_list, item_list)),
+                                        shape=(self.number_of_users, self.number_of_items))
