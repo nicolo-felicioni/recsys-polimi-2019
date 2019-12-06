@@ -34,7 +34,7 @@ class DataObject(object):
             [self.icm_asset_augmented, self.icm_price_augmented, self.icm_class]).tocsr()
         self.ucm_region = data_reader.load_ucm_region(self.number_of_users)
         self.ucm_age = data_reader.load_ucm_age(self.number_of_users)
-        self.ucm_interaction = data_reader.load_ucm_interaction(self.number_of_users)
+        # self.ucm_interaction = data_reader.load_ucm_interaction(self.number_of_users)
         self.ucm_all = sps.hstack([self.ucm_region, self.ucm_age]).tocsr()
         splitter = Splitter(self.urm)
         splitter.split_train_test_check_if_stored(k=k, probability=0, random_seed=random_seed)
@@ -84,8 +84,8 @@ class DataObject(object):
                                             self.get_ids_of_users_with_from_X_to_Y_interactions(21, 31),
                                             "users with [21 - 31] interactions"),
                                            (self.get_number_of_users_with_from_X_to_Y_interactions(32, 41),
-                                            self.get_ids_of_users_with_from_X_to_Y_interactions(32, 42),
-                                            "train users with [32 -  40] interactions"),
+                                            self.get_ids_of_users_with_from_X_to_Y_interactions(32, 41),
+                                            "train users with [32 -  41] interactions"),
                                            (self.get_number_of_users_with_from_X_to_Y_interactions(42, 68),
                                             self.get_ids_of_users_with_from_X_to_Y_interactions(42, 68),
                                             "train users with [42 -  68] interactions"),
@@ -121,7 +121,7 @@ class DataObject(object):
                                                   "train users with [21 -  31] interactions"),
                                                  (self.get_number_of_train_users_with_from_X_to_Y_interactions(32, 41),
                                                   self.get_ids_of_train_users_with_from_X_to_Y_interactions(32, 41),
-                                                  "train users with [32 -  40] interactions"),
+                                                  "train users with [32 -  41] interactions"),
                                                  (self.get_number_of_train_users_with_from_X_to_Y_interactions(42, 68),
                                                   self.get_ids_of_train_users_with_from_X_to_Y_interactions(42, 68),
                                                   "train users with [42 -  68] interactions"),
