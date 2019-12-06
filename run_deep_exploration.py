@@ -56,55 +56,81 @@ from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
 
 if __name__ == '__main__':
 
-    n_dataset = 10
-    def eval_one_data(random_seed):
-        data_reader = DataReader()
-        data = DataObject(data_reader, 1, random_seed=random_seed)
-        data.print()
+    # n_dataset = 10
+    # parallelism = 3
+    # def eval_one_data(random_seed):
+    #     data_reader = DataReader()
+    #     data = DataObject(data_reader, 1, random_seed=random_seed)
+    #     result = []
+    #     recommender = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
+    #     recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
+    #     for n, users, description in data.urm_train_users_by_type:
+    #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+    #         result.append(map)
+    #     users = data.ids_target_users
+    #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+    #     result.append(map)
+    #     return result
+    # for topK in range(2000, 7500, 250):
+    #     for shrink in [1,2,5]:
+    #         for similarity in ["euclidean"]:
+    #             for feature_weighting in ["TF-IDF", "none"]:
+    #                 args = {"topK": topK, "shrink": shrink, "similarity": similarity,
+    #                         "feature_weighting": feature_weighting}
+    #                 partial_scores = Parallel(n_jobs=parallelism)(
+    #                     delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
+    #                 mean_score = np.zeros(shape=len(partial_scores[0]))
+    #                 for s in partial_scores:
+    #                     mean_score += s
+    #                 mean_score = mean_score / n_dataset
+    #                 f = open("deep_user_cbf_euclidean_cold_users.csv", "a+")
+    #                 values = " ".join([str(x) + "," for x in mean_score])
+    #                 f.write(f"{args}, {values}\n")
+    #                 f.flush()
 
-        result = []
-
-        recommender = ItemKNNCFRecommender(data.urm_train)
-        recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
-        for n, users, description in data.urm_train_users_by_type:
-            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-            result.append(map)
-        users = data.ids_warm_user
-        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-        result.append(map)
-        return result
-    for topK in [10, 20, 50, 100, 200]:
-        for shrink in [20, 50, 100, 150, 200]:
-            for similarity in ["tanimoto"]:
-                for feature_weighting in ["BM25"]:
-                    args = {"topK": topK, "shrink": shrink, "similarity": similarity,
-                            "feature_weighting": feature_weighting}
-                    partial_scores = Parallel(n_jobs=n_dataset)(
-                        delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
-                    mean_score = np.zeros(shape=len(partial_scores[0]))
-                    for s in partial_scores:
-                        mean_score += s
-                    mean_score = mean_score / n_dataset
-                    f = open("deep_item_cf_cosine_bm25.csv", "a+")
-                    values = " ".join([str(x) + "," for x in mean_score])
-                    f.write(f"{args}, {values}\n")
-                    f.flush()
+    # n_dataset = 10
+    # def eval_one_data(random_seed):
+    #     data_reader = DataReader()
+    #     data = DataObject(data_reader, 1, random_seed=random_seed)
+    #     result = []
+    #     recommender = ItemKNNCFRecommender(data.urm_train)
+    #     recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
+    #     for n, users, description in data.urm_train_users_by_type:
+    #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+    #         result.append(map)
+    #     users = data.ids_target_users
+    #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+    #     result.append(map)
+    #     return result
+    # for topK in range(5, 100, 5):
+    #     for shrink in range(500, 5000, 500):
+    #         for similarity in ["tanimoto"]:
+    #             for feature_weighting in ["BM25"]:
+    #                 args = {"topK": topK, "shrink": shrink, "similarity": similarity,
+    #                         "feature_weighting": feature_weighting}
+    #                 partial_scores = Parallel(n_jobs=n_dataset)(
+    #                     delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
+    #                 mean_score = np.zeros(shape=len(partial_scores[0]))
+    #                 for s in partial_scores:
+    #                     mean_score += s
+    #                 mean_score = mean_score / n_dataset
+    #                 f = open("deep_item_cf_tanimoto_bm25.csv", "a+")
+    #                 values = " ".join([str(x) + "," for x in mean_score])
+    #                 f.write(f"{args}, {values}\n")
+    #                 f.flush()
 
 
     # n_dataset = 10
     # def eval_one_data(random_seed):
     #     data_reader = DataReader()
     #     data = DataObject(data_reader, 1, random_seed=random_seed)
-    #     data.print()
-    #
     #     result = []
-    #
     #     recommender = ItemKNNCFRecommender(data.urm_train)
     #     recommender.fit(topK = args["topK"], shrink=args["shrink"], similarity=args["similarity"], feature_weighting=args["feature_weighting"])
     #     for n, users, description in data.urm_train_users_by_type:
     #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
     #         result.append(map)
-    #     users = data.ids_warm_user
+    #         users = data.ids_target_users
     #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
     #     result.append(map)
     #     return result
@@ -125,39 +151,35 @@ if __name__ == '__main__':
     #                 f.write(f"{args}, {values}\n")
     #                 f.flush()
 
-    # n_dataset = 8
-    # def eval_one_data(random_seed):
-    #     data_reader = DataReader()
-    #     data = DataObject(data_reader, 1, random_seed=random_seed)
-    #     data.print()
-    #
-    #     result = []
-    #
-    #     recommender = RP3betaRecommender(data.urm_train)
-    #     recommender.fit(topK = args["topK"], alpha=args["alpha"], beta=args["beta"])
-    #     for n, users, description in data.urm_train_users_by_type:
-    #         eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-    #         result.append(map)
-    #     users = data.ids_warm_user
-    #     eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
-    #     result.append(map)
-    #     return result
-    #
-    #
-    # for topK in range(20, 50):
-    #     for alpha in range(10, 30, 2):
-    #         alpha = alpha / 100
-    #         for beta in range(10, 30, 2):
-    #             beta = beta / 100
-    #             args = {"topK": topK, "alpha": alpha, "beta": beta}
-    #             partial_scores = Parallel(n_jobs=n_dataset)(
-    #                 delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
-    #             mean_score = np.zeros(shape=len(partial_scores[0]))
-    #             for s in partial_scores:
-    #                 mean_score += s
-    #             mean_score = mean_score / n_dataset
-    #             f = open("eval_2.csv", "a+")
-    #             f.write(" ".join([str(x) + "," for x in mean_score]))
-    #             values = " ".join([str(x) + "," for x in mean_score])
-    #             f.write(f"{args}, {values}\n")
-    #             f.flush()
+    n_dataset = 10
+    def eval_one_data(random_seed):
+        data_reader = DataReader()
+        data = DataObject(data_reader, 1, random_seed=random_seed)
+        result = []
+        recommender = RP3betaRecommender(data.urm_train)
+        recommender.fit(topK = args["topK"], alpha=args["alpha"], beta=args["beta"])
+        for n, users, description in data.urm_train_users_by_type:
+            eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+            result.append(map)
+        users = data.ids_target_users
+        eval, map = MyEvaluator.evaluate_algorithm(data.urm_test, users, recommender, at=10, remove_top=0)
+        result.append(map)
+        return result
+
+
+    for topK in range(5, 40):
+        for alpha in range(5, 35, 2):
+            alpha = alpha / 100
+            for beta in range(5, 35, 2):
+                beta = beta / 100
+                args = {"topK": topK, "alpha": alpha, "beta": beta}
+                partial_scores = Parallel(n_jobs=n_dataset)(
+                    delayed(eval_one_data)(generation) for generation in range(15, 15 + n_dataset))
+                mean_score = np.zeros(shape=len(partial_scores[0]))
+                for s in partial_scores:
+                    mean_score += s
+                mean_score = mean_score / n_dataset
+                f = open("deep_rp3_low_alpha_and_beta.csv", "a+")
+                values = " ".join([str(x) + "," for x in mean_score])
+                f.write(f"{args}, {values}\n")
+                f.flush()

@@ -60,21 +60,20 @@ if __name__ == '__main__':
 
     data_reader = DataReader()
     data = DataObject(data_reader, 1, random_seed=random_seed)
-    data.print()
 
     for topK in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
         for list_similarity in [[1, 0.88, 0.77, 0.66, 0.55, 0.44, 0.33, 0.22, 0.11],
-                                [1, 0.2, 0,0,0,0,0,0,0,0,0]]:
-                    recommender = NewUserKNNAgeRecommender(data)
-                    recommender.set_similarity(list_similarity=list_similarity)
-                    recommender.fit(topK=topK)
-                    LogToFileEvaluator.evaluate(data,
-                                                random_seed,
-                                                recommender,
-                                                "User CB age",
-                                                f"topK={topK} - list_similarity={list_similarity}",
-                                                filename="userCB_age.csv")
-
+                                [1, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [1, 0.5, 0.25, 0.01, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001]]:
+            recommender = NewUserKNNAgeRecommender(data)
+            recommender.set_similarity(list_similarity=list_similarity)
+            recommender.fit(topK=topK)
+            LogToFileEvaluator.evaluate(data,
+                                        random_seed,
+                                        recommender,
+                                        "User CB age",
+                                        f"topK={topK} - list_similarity={list_similarity}",
+                                        filename="userCB_age.csv")
 
     # for topK in [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]:
     #     for shrink in [10, 100, 1000, 10000]:
