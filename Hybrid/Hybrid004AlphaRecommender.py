@@ -23,14 +23,15 @@ class Hybrid004AlphaRecommender(BaseRecommender):
     def __init__(self, data: DataObject):
         super(Hybrid004AlphaRecommender, self).__init__(data.urm_train)
         self.data = data
-        self.warm_recommender = RP3betaRecommender(data.urm_train)
+        # self.warm_recommender = RP3betaRecommender(data.urm_train)
+        self.warm_recommender = ItemKNNCFRecommender(data.urm_train)
         self.warm_1_recommender = Hybrid101AlphaRecommender(data)
         self.cold_recommender = Hybrid100AlphaRecommender(data)
 
     def fit(self):
         self.cold_recommender.fit()
-        # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
-        self.warm_recommender.fit(topK=20, alpha=0.16, beta=0.24)
+        self.warm_recommender.fit(topK=22, shrink=850, feature_weighting="BM25", similarity="jaccard")
+        # self.warm_recommender.fit(topK=20, alpha=0.16, beta=0.24)
         self.warm_1_recommender.fit()
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
