@@ -119,5 +119,6 @@ venv.bak/
 .Data_manager_split_datasets/*
 stored_matrices/*
 *.csv
+*.info
 
 run_compile_all_cython.txt
