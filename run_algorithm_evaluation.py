@@ -55,17 +55,17 @@ from Data_manager.RecSys2019.RecSys2019Reader import RecSys2019Reader
 from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
 
 if __name__ == '__main__':
-    # for seed in [0, 1, 2, 3, 4]:
-    #     data_reader = DataReader()
-    #     data = DataObject(data_reader, 1, random_seed=seed)
-    #     recommender = RP3betaRecommender(data.urm_train)
-    #     recommender.fit(topK=20, alpha=0.35, beta=0.2)
-    #     LogToFileEvaluator.evaluate(data,
-    #                                 seed,
-    #                                 recommender,
-    #                                 "RP3",
-    #                                 "",
-    #                                 filename="algo_eval.csv")
+    for seed in [0, 1, 2, 3, 4]:
+        data_reader = DataReader()
+        data = DataObject(data_reader, 1, random_seed=seed)
+        recommender = RP3betaRecommender(data.urm_train)
+        recommender.fit(topK=10, alpha=0.27, beta=0.11)
+        LogToFileEvaluator.evaluate(data,
+                                    seed,
+                                    recommender,
+                                    "RP3",
+                                    "",
+                                    filename="algo_eval.csv")
 
     # for seed in [0, 1, 2, 3, 4]:
     #     data_reader = DataReader()
@@ -79,17 +79,17 @@ if __name__ == '__main__':
     #                                 "",
     #                                 filename="algo_eval.csv")
 
-    for seed in [0, 1, 2, 3, 4]:
-        data_reader = DataReader()
-        data = DataObject(data_reader, 1, random_seed=seed)
-        recommender = UserKNNCFRecommender(data.urm_train)
-        recommender.fit(topK=2000, shrink=10, similarity="jaccard", feature_weighting="none")
-        LogToFileEvaluator.evaluate(data,
-                                    seed,
-                                    recommender,
-                                    "ITEM",
-                                    "",
-                                    filename="algo_eval.csv")
+    # for seed in [0, 1, 2, 3, 4]:
+    #     data_reader = DataReader()
+    #     data = DataObject(data_reader, 1, random_seed=seed)
+    #     recommender = UserKNNCFRecommender(data.urm_train)
+    #     recommender.fit(topK=2000, shrink=10, similarity="jaccard", feature_weighting="none")
+    #     LogToFileEvaluator.evaluate(data,
+    #                                 seed,
+    #                                 recommender,
+    #                                 "ITEM",
+    #                                 "",
+    #                                 filename="algo_eval.csv")
 
     # for seed in [0, 1, 2, 3, 4]:
     #     data_reader = DataReader()

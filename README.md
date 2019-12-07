@@ -142,11 +142,11 @@ As an example:
     user_id = 158
     
     recommender_instance = ItemKNNCFRecommender(URM_train)
-    recommender_instance.fit(topK=150)
+    recommender_instance.fit()
     recommended_items = recommender_instance.recommend(user_id, cutoff = 20, remove_seen_flag=True)
     
     recommender_instance = SLIM_ElasticNet(URM_train)
-    recommender_instance.fit(topK=150, l1_ratio=0.1, alpha = 1.0)
+    recommender_instance.fit()
     recommended_items = recommender_instance.recommend(user_id, cutoff = 20, remove_seen_flag=True)
     
 ```
