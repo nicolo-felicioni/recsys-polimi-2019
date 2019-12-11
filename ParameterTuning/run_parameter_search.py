@@ -66,8 +66,8 @@ def run_KNNRecommender_on_similarity_type(similarity_type, parameterSearch,
     original_parameter_search_space = parameter_search_space
 
     hyperparameters_range_dictionary = {}
-    hyperparameters_range_dictionary["topK"] = Integer(5, 1000)
-    hyperparameters_range_dictionary["shrink"] = Integer(0, 1000)
+    hyperparameters_range_dictionary["topK"] = Integer(5, 20000)
+    hyperparameters_range_dictionary["shrink"] = Integer(0, 10000)
     hyperparameters_range_dictionary["similarity"] = Categorical([similarity_type])
     hyperparameters_range_dictionary["normalize"] = Categorical([True, False])
 
@@ -328,7 +328,7 @@ def runParameterSearch_Collaborative(recommender_class, URM_train, URM_train_las
         if recommender_class is RP3betaRecommender:
 
             hyperparameters_range_dictionary = {}
-            hyperparameters_range_dictionary["topK"] = Integer(5, 1000)
+            hyperparameters_range_dictionary["topK"] = Integer(5, 20000)
             hyperparameters_range_dictionary["alpha"] = Real(low = 0, high = 2, prior = 'uniform')
             hyperparameters_range_dictionary["beta"] = Real(low = 0, high = 2, prior = 'uniform')
             hyperparameters_range_dictionary["normalize_similarity"] = Categorical([True, False])
