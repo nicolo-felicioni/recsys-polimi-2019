@@ -24,6 +24,8 @@ class Hybrid101AlphaRecommender(BaseRecommender):
         self.rec2 = ItemKNNCFRecommender(data.urm_train)
         self.rec3 = RP3betaRecommender(data.urm_train)
         self.rec1.fit(sgd_mode="adagrad", topK=15000, epochs=250, learning_rate=1e-05, lambda_i=0.01, lambda_j=0.01)
+        # self.rec1.fit(topK=435, epochs=115, symmetric=True, sgd_mode='adagrad', lambda_i=0.0010067865845523253,
+        #     lambda_j=3.764224446055186e-05, learning_rate=0.00024125117955549121)
         self.rec2.fit(topK=20000, shrink=20000, feature_weighting="TF-IDF")
         self.rec3.fit(topK=10000, alpha=0.55, beta=0.01, implicit=True, normalize_similarity=True)
         self.hybrid_rec = Hybrid1XXAlphaRecommender(data, recommenders=[self.rec1, self.rec2, self.rec3], max_cutoff=20)
