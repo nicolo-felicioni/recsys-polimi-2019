@@ -10,6 +10,7 @@ from Hybrid.Hybrid108AlphaRecommender import Hybrid108AlphaRecommender
 from Hybrid.Hybrid109AlphaRecommender import Hybrid109AlphaRecommender
 from Hybrid.Hybrid1XXAlphaRecommender import Hybrid1XXAlphaRecommender
 from GraphBased.RP3betaRecommender import RP3betaRecommender
+from Hybrid.Hybrid400AlphaRecommender import Hybrid400AlphaRecommender
 from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from KNN.ItemKNNSimilarityHybridRecommender import ItemKNNSimilarityHybridRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
@@ -28,21 +29,16 @@ class Hybrid005AlphaRecommender(BaseRecommender):
         rec1.fit(topK=20, alpha=0.12, beta=0.24)
         rec2 = ItemKNNCFRecommender(data.urm_train)
         rec2.fit(topK=22, shrink=850, similarity='jaccard', feature_weighting='BM25')
-        self.warm_new_recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, rec1.W_sparse, rec2.W_sparse)
-        self.warm_old_recommender = RP3betaRecommender(data.urm_train)
-        self.warm_7_recommender = ItemKNNCFRecommender(data.urm_train)
+        self.warm_2_recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, rec1.W_sparse, rec2.W_sparse)
+        self.warm_recommender = Hybrid400AlphaRecommender(data, 11)
         self.warm_1_recommender = Hybrid101AlphaRecommender(data)
-        self.warm_10_recommender = ItemKNNCFRecommender(data.urm_train)
         self.cold_recommender = Hybrid100AlphaRecommender(data)
 
     def fit(self):
         self.cold_recommender.fit()
         # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
-        self.warm_old_recommender.fit(topK=20, alpha=0.16, beta=0.24)
-        self.warm_new_recommender.fit(alpha=0.9, topK=50)
-        self.warm_7_recommender.fit(topK=22, shrink=850, feature_weighting="BM25", similarity="jaccard")
+        self.warm_2_recommender.fit(alpha=0.9, topK=50)
         self.warm_1_recommender.fit()
-        self.warm_10_recommender.fit(topK=(16+1), shrink=650, similarity='tanimoto', feature_weighting='BM25')
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):
@@ -53,24 +49,24 @@ class Hybrid005AlphaRecommender(BaseRecommender):
         elif user_id_array in self.data.urm_train_users_by_type[1][1]:
             return self.warm_1_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[2][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_2_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[3][1]:
-            return self.warm_old_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_2_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[4][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[5][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[6][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[7][1]:
-            return self.warm_7_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[8][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[9][1]:
-            return self.warm_old_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[10][1]:
-            return self.warm_10_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[11][1]:
-            return self.warm_new_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.ids_cold_user:
             return self.cold_recommender.recommend(user_id_array, cutoff=cutoff)

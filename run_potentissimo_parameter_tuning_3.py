@@ -7,6 +7,7 @@ from Base.Evaluation import MyEvaluator
 from DataObject import DataObject
 from DataReader import DataReader
 from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+from KNN.UserKNNCFRecommender import UserKNNCFRecommender
 
 
 def gen_dataset(seed):
@@ -15,8 +16,7 @@ def gen_dataset(seed):
     return DataObject(data_reader, 1, random_seed=random_seed)
 
 
-def parallel_fit_and_eval_job(recommender, data : DataObject, topK, shrink, similarity, normalize, feature_weighting):
-
+def parallel_fit_and_eval_job(recommender, data: DataObject, topK, shrink, similarity, normalize, feature_weighting):
     # Fit
     recommender.fit(topK, shrink, similarity, normalize, feature_weighting)
 
@@ -30,15 +30,14 @@ def parallel_fit_and_eval_job(recommender, data : DataObject, topK, shrink, simi
     _result.append(_map)
     return _result
 
+
 class Evaluator:
 
     def __init__(self,
-                 target_user_list,
                  dataset_list,
                  type_of_user,
                  parallelism=2,
                  filename_csv="skopt_run.csv"):
-        self.target_user_list = target_user_list
         self.dataset_list = dataset_list
         self.type_of_user = type_of_user
         self.parallelism = parallelism
@@ -60,7 +59,7 @@ class Evaluator:
         recommender_name = "Item CF"
 
         # Creating the recommenders (parallel fit and evaluation)
-        recs = [ItemKNNCFRecommender(data.urm_train) for data in self.dataset_list]
+        recs = [UserKNNCFRecommender(data.urm_train) for data in self.dataset_list]
         pairs = zip(recs, self.dataset_list)
         results = Parallel(n_jobs=parallelism)(
             delayed
@@ -75,6 +74,8 @@ class Evaluator:
         f = open(self.filename_csv, "a+")
         map_as_string = " ".join([str(x) + "," for x in map_per_type])
         f.write(f"{recommender_name}, {input_as_string}, {map_as_string}\n")
+        f.flush()
+        f.close()
 
         # The MAP value that should be optimized
         optimized_map = map_per_type[self.type_of_user]
@@ -87,65 +88,69 @@ class Evaluator:
         self.counter += 1
         self.timer = current_time
 
-        return optimized_map
+        return -optimized_map
 
 
 if __name__ == '__main__':
 
     # Run configuration
-    n_dataset = 2  # Number of datasets
-    type_of_user = 2  # Type of the user to evaluate
-    parallelism = 2  # Number of thread used for training and evaluation
-    n_load_and_rerun = 10
+    n_dataset = 1  # Number of datasets
+    type_of_user = 5  # Type of the user to evaluate
+    parallelism = 1  # Number of thread used for training and evaluation
+    n_load_and_rerun = 5
 
     # Skopt configuration
     acq_func = "EI"  # The acquisition function
     acq_optimizer = "auto"
-    n_calls = 20
-    n_random_starts = 2
+    base_estimator = "RF"  # It can be "RF" (Random Forest) or "ET" (Extra Tree). The first one is more time consuming.
+    n_calls = 1
+    n_random_starts = 1
     random_state = 100
+    n_jobs = 4
 
     # Persistence configuration
-    filename_skopt = "itemCF_2.pkl"
-    filename_csv = "itemCF.csv"
+    filename_skopt = "userCF_5.pkl"
+    filename_csv = "userCF.csv"
 
     dataset_list = Parallel(n_jobs=parallelism)(
         delayed
         (gen_dataset)
         (x + 20)
         for x in range(n_dataset))
-    target_user_list = [data.urm_train_users_by_type[type_of_user][1] for data in dataset_list]
 
-    records = zip(dataset_list, target_user_list)
-
-    eval = Evaluator(target_user_list=target_user_list,
-                     dataset_list=dataset_list,
+    eval = Evaluator(dataset_list=dataset_list,
                      type_of_user=type_of_user,
                      parallelism=parallelism,
                      filename_csv=filename_csv)
 
     hyperparameters = [
-        Integer(0, 20000),
+        Integer(5, 20000),
         Integer(0, 10000),
-        Categorical(['cosine', 'jaccard', "asymmetric", "dice", "tversky"]),
+        Categorical(["cosine", "jaccard", "asymmetric", "dice", "tversky"]),
         Categorical([True, False]),
-        Categorical(['none', 'BM25', 'TF-IDF'])
+        Categorical(["none", "BM25", "TF-IDF"])
     ]
 
     for _ in range(n_load_and_rerun):
 
         try:
-            res_loaded = load(filename_skopt)
+            with open(filename_skopt, "rb") as f:
+                res_loaded = load(f)
+                f.close()
             res = forest_minimize(eval.eval,  # the function to minimize
                                   hyperparameters,  # the bounds on each dimension of x
                                   acq_func=acq_func,  # the acquisition function
                                   # acq_optimizer=acq_optimizer,  # the acquisition function
                                   n_calls=n_calls,  # the number of evaluations of f
                                   n_random_starts=n_random_starts,  # the number of random initialization points
-                                  random_state=random_state,
+                                  base_estimator=base_estimator,  # random forest as estimator
                                   verbose=False,
+                                  n_jobs=n_jobs,
                                   x0=res_loaded.x_iters,
                                   y0=res_loaded.func_vals)  # the random seed
+            with open(filename_skopt, 'wb') as f:
+                dump(res, filename=f, compress=9)
+                f.close()
         except:
             res = forest_minimize(eval.eval,  # the function to minimize
                                   hyperparameters,  # the bounds on each dimension of x
@@ -153,12 +158,9 @@ if __name__ == '__main__':
                                   # acq_optimizer=acq_optimizer,  # the acquisition function
                                   n_calls=n_calls,  # the number of evaluations of f
                                   n_random_starts=n_random_starts,  # the number of random initialization points
-                                  random_state=random_state,
-                                  verbose=False)  # the random seed
-            dump(res, filename=filename_skopt)
-
-    # res = gp_minimize(eval.eval,  # the function to minimize
-    #                       hyperparameters,
-    #                       n_calls=100,
-    #                       n_random_starts=5,
-    #                       n_jobs=4)
+                                  base_estimator=base_estimator,  # random forest as estimator
+                                  verbose=False,
+                                  n_jobs=n_jobs)  # the random seed
+            with open(filename_skopt, 'wb') as f:
+                dump(res, filename=f, compress=9)
+                f.close()
