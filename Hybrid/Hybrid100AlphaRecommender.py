@@ -24,14 +24,15 @@ class Hybrid100AlphaRecommender(BaseRecommender):
         self.data = data
         self.rec1 = UserKNNCBFRecommender(data.ucm_all, data.urm_train)
         self.rec2 = MatrixFactorization_AsySVD_Cython(data.urm_train)
-        self.rec1.fit(shrink=1, topK=11000)
+        self.rec1.load_model("Hybrid", "FULL_URM_UserCBF_topK=5000_shrink=5_feature_weighting=TF-IDF_similarity=euclidean")
         self.rec2.load_model("Hybrid", "AsySVD")
         cold = data.ids_cold_user
         train_cold = data.urm_train_users_by_type[0][1]
-        if train_cold.shape[0] > 0:
-            target_users = np.append(cold, train_cold)
-        else:
-            target_users = cold
+        # if train_cold.shape[0] > 0:
+        #     target_users = np.append(cold, train_cold)
+        # else:
+        #     target_users = cold
+        target_users = data.ids_user
         self.hybrid_rec = Hybrid1CXAlphaRecommender(data, recommenders=[self.rec1, self.rec2],
                                                     recommended_users=target_users, max_cutoff=30)
 

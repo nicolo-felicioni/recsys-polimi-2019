@@ -15,6 +15,7 @@ from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from KNN.ItemKNNSimilarityHybridRecommender import ItemKNNSimilarityHybridRecommender
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
+from SLIM_ElasticNet.SLIMElasticNetRecommender import MultiThreadSLIM_ElasticNet
 
 
 class Hybrid005AlphaRecommender(BaseRecommender):
@@ -25,20 +26,23 @@ class Hybrid005AlphaRecommender(BaseRecommender):
     def __init__(self, data: DataObject):
         super(Hybrid005AlphaRecommender, self).__init__(data.urm_train)
         self.data = data
-        rec1 = RP3betaRecommender(data.urm_train)
-        rec1.fit(topK=20, alpha=0.12, beta=0.24)
-        rec2 = ItemKNNCFRecommender(data.urm_train)
-        rec2.fit(topK=22, shrink=850, similarity='jaccard', feature_weighting='BM25')
-        self.warm_2_recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, rec1.W_sparse, rec2.W_sparse)
-        self.warm_recommender = Hybrid400AlphaRecommender(data, 11)
-        self.warm_1_recommender = Hybrid101AlphaRecommender(data)
         self.cold_recommender = Hybrid100AlphaRecommender(data)
+        self.cold_recommender.fit()
+        # rec1 = RP3betaRecommender(data.urm_train)
+        # rec1.fit(topK=20, alpha=0.12, beta=0.24)
+        # rec2 = ItemKNNCFRecommender(data.urm_train)
+        # rec2.fit(topK=22, shrink=850, similarity='jaccard', feature_weighting='BM25')
+        # self.warm_2_recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, rec1.W_sparse, rec2.W_sparse)
+        self.warm_recommender = MultiThreadSLIM_ElasticNet(data.urm_train)
+        self.warm_1_recommender = Hybrid101AlphaRecommender(data)
 
     def fit(self):
-        self.cold_recommender.fit()
         # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
-        self.warm_2_recommender.fit(alpha=0.9, topK=50)
+        # self.warm_2_recommender.fit(alpha=0.9, topK=50)
         self.warm_1_recommender.fit()
+        self.warm_recommender.fit(topK=100, l1_ratio=0.04705, alpha=0.00115, positive_only=True, max_iter=35)
+        self.warm_recommender.load_model("SLIM_ElasticNet",
+                                         "FULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35")
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):
@@ -49,9 +53,9 @@ class Hybrid005AlphaRecommender(BaseRecommender):
         elif user_id_array in self.data.urm_train_users_by_type[1][1]:
             return self.warm_1_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[2][1]:
-            return self.warm_2_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[3][1]:
-            return self.warm_2_recommender.recommend(user_id_array, cutoff=cutoff)
+            return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[4][1]:
             return self.warm_recommender.recommend(user_id_array, cutoff=cutoff)
         elif user_id_array in self.data.urm_train_users_by_type[5][1]:

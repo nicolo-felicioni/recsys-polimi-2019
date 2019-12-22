@@ -29,10 +29,6 @@ class Hybrid300AlphaRecommender(BaseRecommender):
         matrix = data.tolil(copy=True)
         for user in users:
             items = rec.recommend(user, cutoff=cutoff)
-            # value = np.array([x / cutoff for x in range(1, cutoff + 1)][::-1])
-            # value = value / value.max()
-            # value = value * (max - min)
-            # value = value + min
             for item in items:
                 matrix[user, item] += amount
         self.augmented_matrix = matrix.tocsr()
@@ -41,10 +37,6 @@ class Hybrid300AlphaRecommender(BaseRecommender):
         matrix = data.tolil(copy=True)
         for user in users:
             items = rec.recommend(user, cutoff=cutoff, remove_seen_flag=False)
-            # value = np.array([x / cutoff for x in range(1, cutoff + 1)][::-1])
-            # value = value / value.max()
-            # value = value * (max - min)
-            # value = value + min
             not_relevant_items = [x
                                   for x in matrix[user].rows[0]
                                   if x not in items]

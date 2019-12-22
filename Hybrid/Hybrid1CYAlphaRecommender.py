@@ -1,5 +1,7 @@
 import copy
 
+from joblib import Parallel, delayed
+
 from Base.BaseRecommender import BaseRecommender
 from DataObject import DataObject
 from Data_manager.DataReader import DataReader
@@ -9,6 +11,13 @@ from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 import numpy as np
 import operator
+
+def get_cached_recommendation(rec, recommended_users, max_cutoff):
+    cached_recommendation = {}
+    for user_id in recommended_users:
+        recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
+        cached_recommendation[user_id] = recommended_items
+    return cached_recommendation
 
 class Hybrid1CYAlphaRecommender(BaseRecommender):
     """Hybrid1CYAlphaRecommender recommender"""
@@ -21,12 +30,16 @@ class Hybrid1CYAlphaRecommender(BaseRecommender):
         self.weights = np.zeros(shape=(len(recommenders), max_cutoff))
         self.max_cutoff = max_cutoff
         self.cached_recommendation_all = []
-        for rec in recommenders:
-            cached_recommendation = {}
-            for user_id in recommended_users:
-                recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
-                cached_recommendation[user_id] = recommended_items
-            self.cached_recommendation_all.append(cached_recommendation)
+        # for rec in recommenders:
+        #     cached_recommendation = {}
+        #     for user_id in recommended_users:
+        #         recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
+        #         cached_recommendation[user_id] = recommended_items
+        #     self.cached_recommendation_all.append(cached_recommendation)
+        self.cached_recommendation_all = Parallel(n_jobs=2)(
+            delayed(get_cached_recommendation)
+            (copy.deepcopy(rec), copy.deepcopy(recommended_users), max_cutoff)
+            for rec in recommenders)
         sum_all_weights = 0
         for i in range(len(recommenders)):
             for user_id in recommended_users:

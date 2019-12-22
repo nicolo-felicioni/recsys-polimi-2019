@@ -1,14 +1,19 @@
 import copy
 
+from joblib import Parallel, delayed
+
 from Base.BaseRecommender import BaseRecommender
 from DataObject import DataObject
-from Data_manager.DataReader import DataReader
-from GraphBased.P3alphaRecommender import P3alphaRecommender
-from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
-from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 import numpy as np
 import operator
+
+
+def get_cached_recommendation(rec, recommended_users, max_cutoff):
+    cached_recommendation = {}
+    for user_id in recommended_users:
+        recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
+        cached_recommendation[user_id] = recommended_items
+    return cached_recommendation
 
 
 class Hybrid1CXAlphaRecommender(BaseRecommender):
@@ -22,12 +27,17 @@ class Hybrid1CXAlphaRecommender(BaseRecommender):
         self.weights = []
         self.max_cutoff = max_cutoff
         self.cached_recommendation_all = []
-        for rec in recommenders:
-            cached_recommendation = {}
-            for user_id in recommended_users:
-                recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
-                cached_recommendation[user_id] = recommended_items
-            self.cached_recommendation_all.append(cached_recommendation)
+        # for rec in recommenders:
+        #     cached_recommendation = {}
+        #     for user_id in recommended_users:
+        #         recommended_items = rec.recommend(user_id, cutoff=max_cutoff)
+        #         cached_recommendation[user_id] = recommended_items
+        #     self.cached_recommendation_all.append(cached_recommendation)
+
+        self.cached_recommendation_all = Parallel(n_jobs=8)(
+            delayed(get_cached_recommendation)
+            (copy.deepcopy(rec), copy.deepcopy(recommended_users), max_cutoff)
+            for rec in recommenders)
         for _ in recommenders:
             self.weights.append([x for x in range(2, max_cutoff + 2)][::-1])
 
