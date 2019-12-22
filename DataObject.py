@@ -139,6 +139,7 @@ class DataObject(object):
         # self.train_users_type.append((self.number_of_target_users, self.ids_target_users, "target users"))
         self.ids_ultra_cold_users = np.array([x for x in self.ids_cold_user if self.ucm_all[x].indices.shape[0] == 0])
         self.number_of_ultra_cold_users = self.ids_ultra_cold_users.shape[0]
+        self.augmented_urm = self.urm_train
 
     def clone(self):
         return copy.deepcopy(self)
@@ -310,3 +311,103 @@ class DataObject(object):
 
         self.urm_train = sps.csr_matrix((data_list, (user_list, item_list)),
                                         shape=(self.number_of_users, self.number_of_items))
+
+    def copy(self):
+        return copy.copy(self)
+
+
+def augment_with_item_similarity_best_scores(
+        urm: sps.csr_matrix,
+        similarity,
+        topK,
+        value=0.5,
+        remove_seen=True,
+        users=None
+):
+    # Create a copy of the urm
+    augmented_urm = urm.tolil(copy=True).astype(np.float)
+
+    # Compute the score matrix
+    score_matrix = urm.dot(similarity).astype(np.float)
+
+    # Remove items that has already been seen
+    if remove_seen:
+        indices_seen = urm.nonzero()
+        score_matrix[indices_seen] = float("-inf")
+
+    # Filtering the data that are not in the users list
+    if users is not None:
+        score_matrix = score_matrix[users]
+
+    # Find the topK generated interactions
+    top_indices = score_matrix.data.argpartition(-topK)[-topK:]
+    max_k = score_matrix.data[top_indices].min()
+    x = sps.find(score_matrix)
+    print(x)
+    print(len(x))
+    print(len(x[0]))
+    user_item_data = zip(x[0], x[1], x[2])
+    user_item = [(user, item) for user, item, data in user_item_data if data >= max_k]
+
+    # Insert the best items in the urm matrix
+    for user, item in user_item:
+        augmented_urm[user, item] += value
+
+    # Return the augmented urm
+    return augmented_urm.tocsr()
+
+
+def augment_with_user_similarity_best_scores(
+        urm: sps.csr_matrix,
+        similarity,
+        topK,
+        value=0.5,
+        remove_seen=True,
+        users=None
+):
+    # Create a copy of the urm
+    augmented_urm = urm.tolil(copy=True).astype(np.float)
+
+    # Compute the score matrix
+    score_matrix = similarity.dot(urm).astype(np.float)
+
+    # Remove items that has already been seen
+    if remove_seen:
+        indices_seen = urm.nonzero()
+        score_matrix[indices_seen] = float("-inf")
+
+    # Filtering the data that are not in the users list
+    if users is not None:
+        score_matrix = score_matrix[users]
+
+    # Find the topK generated interactions
+    top_indices = score_matrix.data.argpartition(-topK)[-topK:]
+    max_k = score_matrix.data[top_indices].min()
+    x = sps.find(score_matrix)
+    user_item_data = zip(x[0], x[1], x[2])
+    user_item = [(user, item) for user, item, data in user_item_data if data >= max_k]
+
+    # Insert the best items in the urm matrix
+    for user, item in user_item:
+        augmented_urm[user, item] += value
+
+    # Return the augmented urm
+    return augmented_urm.tocsr()
+
+
+def augment_with_best_recommended_items(
+        urm: sps.csr_matrix,
+        rec,
+        users,
+        cutoff,
+        value=0.5
+):
+    augmented_urm = urm.tolil(copy=True).astype(np.float)
+
+    for user in users:
+        recommended_items = rec.recommend(user, cutoff=cutoff)
+        for item in recommended_items:
+            augmented_urm[user, item] += value
+
+    # Return the augmented urm
+    return augmented_urm.tocsr()

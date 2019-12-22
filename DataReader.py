@@ -27,7 +27,7 @@ class DataReader(object):
         item_id_unique = np.unique(item_id_list)
 
         csr_matrix = sps.csr_matrix((rating_id_list, (user_id_list, item_id_list)))
-
+        csr_matrix = csr_matrix.astype(dtype=np.float)
         # print("DataReader:")
         # print("\tLoading the URM:")
         # print("\t\tURM size:" + str(csr_matrix.shape))
