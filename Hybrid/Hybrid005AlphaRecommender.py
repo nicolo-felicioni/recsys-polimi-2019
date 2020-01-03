@@ -39,7 +39,7 @@ class Hybrid005AlphaRecommender(BaseRecommender):
     def fit(self):
         # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
         # self.warm_2_recommender.fit(alpha=0.9, topK=50)
-        self.warm_1_recommender.fit()
+        self.warm_1_recommender.fit(999)
         self.warm_recommender.fit(topK=100, l1_ratio=0.04705, alpha=0.00115, positive_only=True, max_iter=35)
         self.warm_recommender.load_model("SLIM_ElasticNet",
                                          "FULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35")
