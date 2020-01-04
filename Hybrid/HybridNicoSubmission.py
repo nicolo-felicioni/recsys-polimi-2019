@@ -29,7 +29,7 @@ class HybridNicoSubmission(BaseRecommender):
 
 
     def fit(self, alpha=0.5):
-        self.slim.load_model('', 'SLIM_ElasticNetFULL_URM_topK=100_l1_ratio=0.02_alpha=0.0005_positive_only=True_max_iter=35')
+        self.slim.load_model('', 'SLIM_ElasticNetFULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35')
         self.rp3.fit(topK=20, alpha=0.16, beta=0.24)
 
         self.fit_no_cached(path_slim=None, path_rp3=None, alpha=alpha)
