@@ -59,30 +59,10 @@ class HybridNico(BaseRecommender):
 
     def fit_no_cached(self, path_slim, path_rp3, alpha=0.5):
 
-        n_users = self.number_of_users
+        user_id_array = np.array(range(self.number_of_users))
 
-        list_slim = []
-        list_rp3 = []
-        for u_id in range(n_users):
-            list_slim.append(np.squeeze(self.slim._compute_item_score(user_id_array=u_id)))
-            list_rp3.append(np.squeeze(self.rp3._compute_item_score(user_id_array=u_id)))
-
-        self.mat_scores_slim = np.stack(list_slim, axis=0)
-        self.mat_scores_rp3 = np.stack(list_rp3, axis=0)
-
-        del list_slim, list_rp3
-
-
-        '''print("slim scores stats:")
-        print("min = {}".format(mat_scores_slim.min()))
-        print("max = {}".format(mat_scores_slim.max()))
-        print("average = {}".format(mat_scores_slim.mean()))
-
-
-        print("rp3 scores stats:")
-        print("min = {}".format(mat_scores_rp3.min()))
-        print("max = {}".format(mat_scores_rp3.max()))
-        print("average = {}".format(mat_scores_rp3.mean()))'''
+        self.mat_scores_slim = self.slim._compute_item_score(user_id_array=user_id_array)
+        self.mat_scores_rp3 = self.rp3._compute_item_score(user_id_array=user_id_array)
 
         # normalization
         self.mat_scores_slim /= self.mat_scores_slim.max()
