@@ -141,6 +141,17 @@ class DataObject(object):
         self.number_of_ultra_cold_users = self.ids_ultra_cold_users.shape[0]
         self.augmented_urm = self.urm_train
 
+        # concatenation of URM and ICM
+        self.urm_icm_train = sps.vstack([self.urm_train, self.icm_all_augmented.T])
+        self.urm_icm_train = self.urm_icm_train.tocsr()
+
+        # concatenation of URM + ICM and UCM + padding of zeros
+        s1 = self.icm_all_augmented.shape[1]
+        s2 = self.ucm_all.shape[1]
+        padding = sps.csr_matrix(np.zeros((s1, s2)))
+        self.urm_icm_ucm_train = sps.hstack([self.urm_icm_train, sps.vstack([self.ucm_all, padding])])
+        self.urm_icm_ucm_train = self.urm_icm_ucm_train.tocsr()
+
     def clone(self):
         return copy.deepcopy(self)
 

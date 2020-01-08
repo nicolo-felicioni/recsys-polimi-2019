@@ -9,6 +9,8 @@ from joblib import Parallel, delayed
 import multiprocessing
 import ml_metrics
 
+from DataObject import DataObject
+
 
 def precision(recommended_items, relevant_items):
     is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
@@ -72,6 +74,113 @@ def evaluate_algorithm(test, users, recommender_object, at=10, remove_top=0):
     cumulative_MAP /= num_eval
 
     return("Recommender performance is: MAP = {:.8f}".format(cumulative_MAP)), cumulative_MAP
+
+
+def total_evaluation(test, data: DataObject, recommender_object, at=10, remove_top=0):
+    cumulative_precision = 0.0
+    cumulative_recall = 0.0
+    cumulative_MAP = 0.0
+    URM_test = test
+    list_strings_to_return = []
+
+    recommended_items_dict = {}
+
+    for user_id in data.ids_user:
+        recommended_items_dict[user_id] = recommender_object.recommend(user_id, cutoff=(at + remove_top))[
+                                 remove_top:at + remove_top]
+
+    for n, users, description in data.urm_train_users_by_type:
+        userList_unique = users
+        num_eval = len(userList_unique)
+        for user_id in userList_unique:
+            relevant_items = URM_test[user_id].indices
+            if len(relevant_items):
+                recommended_items = recommended_items_dict[user_id]
+                if len(recommended_items):
+                    _m = MAP(recommended_items, relevant_items)
+                    # cumulative_precision += _prec
+                    # cumulative_recall += _rec
+                    cumulative_MAP += _m
+
+        # cumulative_precision /= num_eval
+        # cumulative_recall /= num_eval
+        cumulative_MAP /= num_eval
+
+        list_strings_to_return.append((description + "\tRecommender performance is: MAP = {:.8f}".format(cumulative_MAP)))
+
+    for user_id in data.ids_target_users:
+        relevant_items = URM_test[user_id].indices
+        if len(relevant_items):
+            recommended_items = recommended_items_dict[user_id]
+            if len(recommended_items):
+                _m = MAP(recommended_items, relevant_items)
+                # cumulative_precision += _prec
+                # cumulative_recall += _rec
+                cumulative_MAP += _m
+
+    # cumulative_precision /= num_eval
+    # cumulative_recall /= num_eval
+    cumulative_MAP /= len(data.ids_target_users)
+
+    list_strings_to_return.append(("Recommender performance on target is: MAP = {:.8f}".format(cumulative_MAP)))
+
+    return list_strings_to_return
+
+def total_evaluation_remove_custom_items(test, data: DataObject, recommender_object, custom_item_ids, at=10, remove_top=0):
+    cumulative_precision = 0.0
+    cumulative_recall = 0.0
+    cumulative_MAP = 0.0
+    URM_test = test
+    list_strings_to_return = []
+
+    recommended_items_dict = {}
+    # setting the items to ignore
+    recommender_object.set_items_to_ignore(custom_item_ids)
+
+    for user_id in data.ids_user:
+        recommended_items_dict[user_id] = recommender_object.recommend(user_id, cutoff=(at + remove_top),
+                                                         remove_custom_items_flag=True)[
+                                 remove_top:at + remove_top]
+
+    for n, users, description in data.urm_train_users_by_type:
+        userList_unique = users
+        num_eval = len(userList_unique)
+        for user_id in userList_unique:
+            relevant_items = URM_test[user_id].indices
+            if len(relevant_items):
+                recommended_items = recommended_items_dict[user_id]
+                if len(recommended_items):
+                    _m = MAP(recommended_items, relevant_items)
+                    # cumulative_precision += _prec
+                    # cumulative_recall += _rec
+                    cumulative_MAP += _m
+
+        # cumulative_precision /= num_eval
+        # cumulative_recall /= num_eval
+        cumulative_MAP /= num_eval
+
+        list_strings_to_return.append((description + "\tRecommender performance is: MAP = {:.8f}".format(cumulative_MAP)))
+
+    for user_id in data.ids_target_users:
+        relevant_items = URM_test[user_id].indices
+        if len(relevant_items):
+            recommended_items = recommended_items_dict[user_id]
+            if len(recommended_items):
+                _m = MAP(recommended_items, relevant_items)
+                # cumulative_precision += _prec
+                # cumulative_recall += _rec
+                cumulative_MAP += _m
+
+    # cumulative_precision /= num_eval
+    # cumulative_recall /= num_eval
+    cumulative_MAP /= len(data.ids_target_users)
+
+    list_strings_to_return.append(("Recommender performance on target is: MAP = {:.8f}".format(cumulative_MAP)))
+
+    return list_strings_to_return
+
+
+
 
 def evaluate_algorithm_parallel(test, users, recommender_object, at=10, remove_top=0, parallelism=4):
     cumulative_precision = 0.0

@@ -21,25 +21,27 @@ class Hybrid3ScoreRecommender(BaseRecommender):
 
     RECOMMENDER_NAME = "Hybrid3ScoreRecommender"
 
-    def __init__(self, data: DataObject, random_seed: int):
+    def __init__(self, data: DataObject, random_seed: int, alpha=1):
         super(Hybrid3ScoreRecommender, self).__init__(data.urm_train)
         self.random_seed = random_seed
         self.slim = SLIMElasticNetRecommender(self.URM_train)
         self.rp3 = RP3betaRecommender(self.URM_train)
         self.itemcf = ItemKNNCFRecommender(self.URM_train)
+        self.alpha = alpha
 
 
 
     def fit(self, alpha_beta_ratio=1, alpha_gamma_ratio=1):
+
         self.slim.load_model('', 'SLIM_ElasticNetURM_seed='
                              + str(self.random_seed) +
                              '_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35')
         self.rp3.fit(topK=20, alpha=0.16, beta=0.24)
         self.itemcf.fit(topK=22, shrink=850, similarity='jaccard', feature_weighting='BM25')
 
-        self.alpha = 1
-        self.beta = alpha_beta_ratio
-        self.gamma = alpha_gamma_ratio
+        # self.alpha = 1
+        self.beta = self.alpha * alpha_beta_ratio
+        self.gamma = self.alpha * alpha_gamma_ratio
 
 
     def _compute_item_score(self, user_id_array, items_to_compute = None):
