@@ -27,21 +27,28 @@ class Hybrid201AlphaRecommender(BaseRecommender):
         self.rec1 = SLIM_BPR_Cython(urm)
         self.rec2 = ItemKNNCFRecommender(urm)
         self.rec3 = RP3betaRecommender(urm)
+        self.random_seed = data.random_seed
         try:
-            self.rec1.load_model("H201_ICM", "SLIM_BRP_topK=15000_epochs=250_learning_rate=1e-05_lambda_i=0.01_lambda_j=0.01")
+            self.rec1.load_model("stored_recommenders/slim_bpr/",
+                                 f'with_icm_{self.random_seed}_topK=15000_epochs=250_learning_rate=1e-05_lambda_i=0.01_lambda_j=0.01')
         except:
             self.rec1.fit(sgd_mode="adagrad", topK=15000, epochs=250, learning_rate=1e-05, lambda_i=0.01, lambda_j=0.01)
-            self.rec1.save_model("H201_ICM", "topK=15000_epochs=250_learning_rate=1e-05_lambda_i=0.01_lambda_j=0.01")
+            self.rec1.save_model("stored_recommenders/slim_bpr/",
+                                 f'with_icm_{self.random_seed}_topK=15000_epochs=250_learning_rate=1e-05_lambda_i=0.01_lambda_j=0.01')
         try:
-            self.rec2.load_model("H201_ICM", "ITEM_CF_topK=20000_shrink=20000_feature_weighting=TF-IDF")
+            self.rec2.load_model("stored_recommenders/item_cf/",
+                                 f'with_icm_{self.random_seed}_topK=20000_shrink=20000_feature_weighting=TF-IDF')
         except:
             self.rec2.fit(topK=20000, shrink=20000, feature_weighting="TF-IDF")
-            self.rec2.save_model("H201_ICM", "ITEM_CF_topK=20000_shrink=20000_feature_weighting=TF-IDF")
+            self.rec2.save_model("stored_recommenders/item_cf/",
+                                 f'with_icm_{self.random_seed}_topK=20000_shrink=20000_feature_weighting=TF-IDF')
         try:
-            self.rec3.load_model("H201_ICM", "RP3_topK=10000_alpha=0.55_beta=0.01_implicit=True_normalize_similarity=True")
+            self.rec3.load_model("stored_recommenders/rp3_beta/",
+                                 f'with_icm_{self.random_seed}_topK=10000_alpha=0.55_beta=0.01_implicit=True_normalize_similarity=True')
         except:
             self.rec3.fit(topK=10000, alpha=0.55, beta=0.01, implicit=True, normalize_similarity=True)
-            self.rec3.load_model("H201_ICM", "RP3_topK=10000_alpha=0.55_beta=0.01_implicit=True_normalize_similarity=True")
+            self.rec3.save_model("stored_recommenders/rp3_beta/",
+                                 f'with_icm_{self.random_seed}_topK=10000_alpha=0.55_beta=0.01_implicit=True_normalize_similarity=True')
         self.hybrid_rec = Hybrid1XXAlphaRecommender(data, recommenders=[self.rec1, self.rec2, self.rec3], max_cutoff=20)
 
     def fit(self):

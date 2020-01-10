@@ -118,13 +118,13 @@ class DataReader(object):
             for item, feature_id_list, data in sorted_list[min:max]:
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i) + off_set)
-                new_data_id_list.append(0.5)
+                new_data_id_list.append(0.75)
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i+1) + off_set)
                 new_data_id_list.append(1)
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i+2) + off_set)
-                new_data_id_list.append(0.5)
+                new_data_id_list.append(0.75)
 
 
         csr_matrix = sps.csr_matrix((new_data_id_list, (new_item_id_list, new_feature_id_list)))
@@ -149,7 +149,7 @@ class DataReader(object):
         all_list = zip(item_id_list, feature_id_list, data_id_list)
         sorted_list = sorted(all_list, key=lambda v: v[2])
         n_cluster = 5
-        off_set = 8
+        off_set = 0
         size = len(sorted_list)
 
         new_item_id_list = []
@@ -162,13 +162,13 @@ class DataReader(object):
             for item, feature_id_list, data in sorted_list[min:max]:
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i) + off_set)
-                new_data_id_list.append(0.5)
+                new_data_id_list.append(0.75)
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i+1) + off_set)
                 new_data_id_list.append(1)
                 new_item_id_list.append(int(item))
                 new_feature_id_list.append(int(i+2) + off_set)
-                new_data_id_list.append(0.5)
+                new_data_id_list.append(0.75)
 
 
         csr_matrix = sps.csr_matrix((new_data_id_list, (new_item_id_list, new_feature_id_list)))

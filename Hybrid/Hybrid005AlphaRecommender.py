@@ -16,6 +16,7 @@ from KNN.ItemKNNSimilarityHybridRecommender import ItemKNNSimilarityHybridRecomm
 from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from SLIM_ElasticNet.SLIMElasticNetRecommender import MultiThreadSLIM_ElasticNet
+import scipy.sparse as sps
 
 
 class Hybrid005AlphaRecommender(BaseRecommender):
@@ -33,16 +34,24 @@ class Hybrid005AlphaRecommender(BaseRecommender):
         # rec2 = ItemKNNCFRecommender(data.urm_train)
         # rec2.fit(topK=22, shrink=850, similarity='jaccard', feature_weighting='BM25')
         # self.warm_2_recommender = ItemKNNSimilarityHybridRecommender(data.urm_train, rec1.W_sparse, rec2.W_sparse)
+        urm = data.urm_train
+        urm = sps.vstack([data.urm_train, data.icm_all_augmented.T])
+        urm = urm.tocsr()
         self.warm_recommender = MultiThreadSLIM_ElasticNet(data.urm_train)
+        self.warm_2_3_recommender = MultiThreadSLIM_ElasticNet(data.urm_train)
         self.warm_1_recommender = Hybrid101AlphaRecommender(data)
 
     def fit(self):
         # self.warm_recommender.fit(topK=30, shrink=30, feature_weighting="none", similarity="jaccard")
         # self.warm_2_recommender.fit(alpha=0.9, topK=50)
-        self.warm_1_recommender.fit(999)
-        self.warm_recommender.fit(topK=100, l1_ratio=0.04705, alpha=0.00115, positive_only=True, max_iter=35)
-        self.warm_recommender.load_model("SLIM_ElasticNet",
-                                         "FULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35")
+        self.warm_1_recommender.fit()
+        try:
+            self.warm_recommender.load_model("SLIM_ElasticNet_ICM",
+                                             "FULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35")
+        except:
+            self.warm_recommender.fit(topK=100, l1_ratio=0.04705, alpha=0.00115, positive_only=True, max_iter=35)
+            self.warm_recommender.save_model("SLIM_ElasticNet_ICM",
+                                             "FULL_URM_topK=100_l1_ratio=0.04705_alpha=0.00115_positive_only=True_max_iter=35")
 
     def recommend(self, user_id_array, cutoff=None, remove_seen_flag=True, items_to_compute=None,
                   remove_top_pop_flag=False, remove_CustomItems_flag=False, return_scores=False):

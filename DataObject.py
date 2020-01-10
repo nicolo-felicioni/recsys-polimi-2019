@@ -8,6 +8,7 @@ from scipy import sparse as sps
 class DataObject(object):
 
     def __init__(self, data_reader, k, random_seed=16):
+        self.random_seed = random_seed
         self.data_reader = data_reader
         self.urm, self.ids_warm_user, self.ids_warm_item = data_reader.load_urm()
         self.number_of_users = self.urm.shape[0]
